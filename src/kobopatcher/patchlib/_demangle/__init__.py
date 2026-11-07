@@ -40,7 +40,9 @@ __all__ = ["to_string", "DemangleError", "NotMangledNameError"]
 if sys.version_info >= (3, 11):
     _DEEP_RECURSION_LIMIT = 1_000_000
 else:  # pragma: no cover
-    _DEEP_RECURSION_LIMIT = 250_000
+    # Before 3.12 every Python call also uses C stack (more on Windows), so
+    # the limit has to fit into _DEEP_STACK_SIZE. Real symbols need far less.
+    _DEEP_RECURSION_LIMIT = 40_000 if sys.platform == "win32" else 120_000
 _DEEP_STACK_SIZE = 512 * 1024 * 1024
 
 

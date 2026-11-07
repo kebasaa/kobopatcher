@@ -49,7 +49,23 @@ def _env(compat):
 _BANNER = re.compile(r"^kobopatch(er)? \S+\nhttps://github.com/\S+\n\n", re.M)
 
 
+def _sort_overrides(s):
+    """kobopatch printed the overrides of a patch file in random (Go map)
+    order; compare them as a set."""
+    out, block = [], []
+    for ln in s.split("\n"):
+        if ln.startswith("    ENABLE  `") or ln.startswith("    DISABLE `"):
+            block.append(ln)
+            continue
+        out.extend(sorted(block))
+        block = []
+        out.append(ln)
+    out.extend(sorted(block))
+    return "\n".join(out)
+
+
 def _norm_out(s, td):
+    s = _sort_overrides(s)
     s = _BANNER.sub("", s, count=1)
     s = s.replace(td, "TMP")
     s = re.sub(r"\(\*([\w.]+)\)\(0x[0-9a-f]+\)", r"(*\1)(PTR)", s)

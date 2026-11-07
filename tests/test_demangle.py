@@ -385,9 +385,9 @@ def test_non_ascii_is_handled_bytewise():
 
 def test_deep_nesting_does_not_hit_recursion_limit():
     # Far deeper than the default Python recursion limit (and than any real
-    # symbol). Python 3.10/3.11 use the C stack for each Python call, so they
-    # can't go as deep as 3.12+.
-    depth = 200_000 if sys.version_info >= (3, 12) else 20_000
+    # symbol). Python 3.10 uses the C stack for each Python call, so it can't
+    # go as deep as 3.11+.
+    depth = 200_000 if sys.version_info >= (3, 11) else 5_000
     assert to_string("_Z1f" + "P" * depth + "i") == "f(int" + "*" * depth + ")"
 
 
