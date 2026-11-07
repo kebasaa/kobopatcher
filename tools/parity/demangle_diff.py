@@ -189,7 +189,7 @@ _GO_STRING = re.compile(r'"((?:[^"\\\n]|\\.)*)"|`([^`]*)`')
 def upstream_inputs(moddir: Path) -> set[bytes]:
     out: set[bytes] = set()
     for f in sorted(moddir.glob("*_test.go")):
-        text = f.read_text()
+        text = f.read_text(encoding="utf-8")
         for m in _GO_STRING.finditer(text):
             s = m.group(1) if m.group(1) is not None else m.group(2)
             if s.startswith("_") and "\\" not in s:

@@ -713,7 +713,7 @@ def _load_p32_diff():
 def _fixture_cases():
     if not FIXTURE.exists():
         return []
-    doc = json.loads(FIXTURE.read_text())
+    doc = json.loads(FIXTURE.read_text(encoding="utf-8"))
     return doc["cases"]
 
 
@@ -731,7 +731,7 @@ def p32_diff():
 @pytest.fixture(scope="module")
 def p32_bufs(p32_diff):
     bufs = p32_diff.synth_buffers()
-    doc = json.loads(FIXTURE.read_text())
+    doc = json.loads(FIXTURE.read_text(encoding="utf-8"))
     for k, h in doc["buffers"].items():
         assert __import__("hashlib").sha1(bufs[k]).hexdigest() == h, "synthetic buffer %s changed; regenerate the fixture" % k
     lib = REPO / "tests" / "testdata" / "libnickel.so.1.0.0"

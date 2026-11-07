@@ -820,7 +820,7 @@ def main() -> int:
                 for i in sorted(pick)
             ],
         }
-        args.write_fixture.write_text(json.dumps(doc, indent=0, ensure_ascii=False) + "\n")
+        args.write_fixture.write_text(json.dumps(doc, indent=0, ensure_ascii=False) + "\n", encoding="utf-8")
         print("wrote %d cases to %s" % (len(pick), args.write_fixture), file=sys.stderr)
     return 1 if "UNEXPECTED" in classes else 0
 

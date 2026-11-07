@@ -133,8 +133,8 @@ def parse_formats(src: str, ops: dict[str, int], args: dict[str, int]):
 
 
 def generate(armasm: Path) -> str:
-    tables_src = (armasm / "tables.go").read_text()
-    decode_src = (armasm / "decode.go").read_text()
+    tables_src = (armasm / "tables.go").read_text(encoding="utf-8")
+    decode_src = (armasm / "decode.go").read_text(encoding="utf-8")
 
     op_consts = parse_iota_block(tables_src, r"^const \(\n", "Op")
     ops = dict(op_consts)
@@ -212,7 +212,7 @@ def main(argv=None) -> int:
     armasm = ns.armasm or default_armasm_dir()
     text = generate(armasm)
     if ns.check:
-        cur = ns.out.read_text() if ns.out.exists() else None
+        cur = ns.out.read_text(encoding="utf-8") if ns.out.exists() else None
         if cur != text:
             print(f"{ns.out} is out of date", file=sys.stderr)
             return 1

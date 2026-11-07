@@ -43,6 +43,7 @@ tools/parity/demangle_diff.py.
 from __future__ import annotations
 
 import gzip
+import sys
 import os
 import random
 import struct
@@ -383,8 +384,10 @@ def test_non_ascii_is_handled_bytewise():
 
 
 def test_deep_nesting_does_not_hit_recursion_limit():
-    # Far deeper than the default Python recursion limit.
-    depth = 200_000
+    # Far deeper than the default Python recursion limit (and than any real
+    # symbol). Python 3.10/3.11 use the C stack for each Python call, so they
+    # can't go as deep as 3.12+.
+    depth = 200_000 if sys.version_info >= (3, 12) else 20_000
     assert to_string("_Z1f" + "P" * depth + "i") == "f(int" + "*" * depth + ")"
 
 

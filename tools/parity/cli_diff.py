@@ -123,7 +123,7 @@ def _one_set(job):
                 "patches": {path: target},
                 "overrides": {path: en} if en else {},
             }
-            with open(os.path.join(d, "kobopatch.yaml"), "w") as f:
+            with open(os.path.join(d, "kobopatch.yaml"), "w", encoding="utf-8") as f:
                 json.dump(cfg, f)  # JSON is YAML
             code, out, err = _run(cmd + ["kobopatch.yaml"], d, _env(compat))
             res[side] = {"code": code, "out": _norm_out(out, d), "err": _norm_out(err, d), "tgz": _tgz(cfg["out"])}
@@ -285,10 +285,10 @@ def cmd_errors(a):
         for side, cmd in (("go", [a.go]), ("py", PY)):
             with tempfile.TemporaryDirectory(prefix="clidiff") as td:
                 if cfg is not None:
-                    with open(os.path.join(td, "kobopatch.yaml"), "w") as f:
+                    with open(os.path.join(td, "kobopatch.yaml"), "w", encoding="utf-8") as f:
                         f.write(cfg.replace("{tar}", tar))
                 for fn, c in files.items():
-                    with open(os.path.join(td, fn), "w") as f:
+                    with open(os.path.join(td, fn), "w", encoding="utf-8") as f:
                         f.write(c)
                 code, out, err = _run(cmd + (args or ["kobopatch.yaml"]), td, _env(a.go_compat), timeout=600)
                 res[side] = (code, _norm_out(err, td).strip(), _norm_out(out, td).strip().splitlines()[-1:] if out.strip() else [])

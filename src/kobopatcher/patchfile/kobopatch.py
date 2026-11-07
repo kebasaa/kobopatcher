@@ -55,7 +55,11 @@ class FlexAbsOffset:
             parts = []
             for n, v in (("Offset", self.offset), ("Sym", self.sym), ("SymPLT", self.sym_plt), ("SymPLTTail", self.sym_plt_tail), ("Rel", self.rel)):
                 if v is not None:
-                    parts.append("%s: %s" % (n, "0x%X" % v if isinstance(v, int) and n != "Rel" else (v if isinstance(v, int) else quote(v))))
+                    if isinstance(v, int):
+                        v = ("-0x%X" % -v if v < 0 else "0x%X" % v) if n != "Rel" else str(v)
+                    else:
+                        v = quote(v)
+                    parts.append("%s: %s" % (n, v))
             return "{" + ", ".join(parts) + "}"
 
         def p(v, t):

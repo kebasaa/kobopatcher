@@ -85,7 +85,7 @@ def test_full_run(tmp_path, fw, testdata, capsys, monkeypatch):
     assert data[i : i + 5] == b"_.otf"
     ti, data = m["./usr/local/Kobo/libboggle.so"]
     assert data == b"" and ti.mode == 0o644
-    assert (d / "out" / "log.txt").read_text().startswith("kobopatcher ")
+    assert (d / "out" / "log.txt").read_text(encoding="utf-8").startswith("kobopatcher ")
 
 
 def test_check_elf(tmp_path, fw, capsys):
@@ -134,7 +134,9 @@ def test_translations(tmp_path, fw):
 
 
 def test_translation_prefix(tmp_path, fw, capsys):
-    d = _setup(tmp_path, fw, "translations:\n  src/de.ts: usr/local/de.qm\nlrelease: %s\n" % (shutil.which("true") or "true"))
+    import sys
+
+    d = _setup(tmp_path, fw, "translations:\n  src/de.ts: usr/local/de.qm\nlrelease: '%s'\n" % sys.executable)
     (d / "src" / "de.ts").write_text("x")
     assert cli.main([str(d / "kobopatch.yaml")]) == 1
     assert "must start with usr/local/Kobo/translations/" in capsys.readouterr().err
@@ -174,7 +176,7 @@ def test_run_tests_failure(tmp_path, fw, capsys):
 
 def test_errors(tmp_path, fw, capsys):
     d = _setup(tmp_path, fw)
-    cfg = (d / "kobopatch.yaml").read_text()
+    cfg = (d / "kobopatch.yaml").read_text(encoding="utf-8")
     (d / "kobopatch.yaml").write_text(cfg.replace("usr/local/Kobo/libboggle.so", "usr/local/Kobo/libnope.so"))
     assert cli.main([str(d / "kobopatch.yaml")]) == 1
     assert "could not find target 'usr/local/Kobo/libnope.so' of patch file 'src/boggle.yaml' in the firmware" in capsys.readouterr().err
@@ -210,8 +212,8 @@ def test_symdump_and_cssextract(tmp_path, testdata, monkeypatch):
     (tmp_path / "lib.so").write_bytes(testdata("libnickel.so.1.0.0"))
     monkeypatch.chdir(tmp_path)
     assert symdump.main(["lib.so"]) == 0
-    syms = json.loads((tmp_path / "symdump.out.json").read_text())
+    syms = json.loads((tmp_path / "symdump.out.json").read_text(encoding="utf-8"))
     assert len(syms) == 48035 and set(syms[0]) == {"Name", "Offset", "Index", "Type", "OffsetGOT", "OffsetPLT", "OffsetPLTTail", "Demangled"}
     assert cssextract.main(["nickel"]) == 0
-    css = (tmp_path / "cssextract.out.css").read_text()
+    css = (tmp_path / "cssextract.out.css").read_text(encoding="utf-8")
     assert "offset_int32(4563746)" in css and "#boggleContainer[qApp_deviceIsPika=true]" in css

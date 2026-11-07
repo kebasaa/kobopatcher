@@ -352,7 +352,7 @@ def _token_line(data: bytes) -> str:
 
 
 def _fixture_cases():
-    doc = json.loads(FIXTURE.read_text())
+    doc = json.loads(FIXTURE.read_text(encoding="utf-8"))
     return doc["cases"]
 
 

@@ -51,7 +51,7 @@ REPO = Path(__file__).resolve().parent.parent
 
 def test_decode_txt():
     # Port of TestDecode (decode_test.go).
-    all_ = (TESTDATA / "armasm_cases_decode.txt").read_text()
+    all_ = (TESTDATA / "armasm_cases_decode.txt").read_text(encoding="utf-8")
     while "\t\t" in all_:
         all_ = all_.replace("\t\t", "\t")
     errors = []
@@ -193,7 +193,7 @@ def test_module_layout():
     assert len(tables.OP_NAMES) > 4000
     for name in ("ADD", "LDR", "ADD_EQ", "LDR_ZZ", "BKPT", "VMOV_F64", "UNDEF"):
         assert getattr(armasm, name) == getattr(Op, name)
-    assert (REPO / "src/kobopatcher/patchlib/_armasm/LICENSE").read_text().startswith(
+    assert (REPO / "src/kobopatcher/patchlib/_armasm/LICENSE").read_text(encoding="utf-8").startswith(
         "Copyright (c) 2009 The Go Authors.")
 
 

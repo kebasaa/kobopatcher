@@ -54,11 +54,11 @@ def gen_jobs(args):
         rootfs, setdir = rest.split(":", 1)
         import yaml
 
-        with open(os.path.join(setdir, "kobopatch.yaml")) as fh:
+        with open(os.path.join(setdir, "kobopatch.yaml"), encoding="utf-8") as fh:
             cfg = yaml.safe_load(fh)
         for pfile, target in cfg["patches"].items():
             jobs.extend(_jobs_for(ver, os.path.join(setdir, pfile), {"bin": os.path.join(rootfs, target), "member": ""}, pf))
-    with open(args.o, "w") as out:
+    with open(args.o, "w", encoding="utf-8") as out:
         for j in jobs:
             out.write(json.dumps(j) + "\n")
     print("%d jobs" % len(jobs), file=sys.stderr)
@@ -189,9 +189,9 @@ def _run_group(g):
 
 
 def cmd_py(args):
-    jobs = [json.loads(line) for line in open(args.jobs)]
+    jobs = [json.loads(line) for line in open(args.jobs, encoding="utf-8")]
     t = time.time()
-    with multiprocessing.Pool(args.j, initializer=_init, initargs=(args.go_compat,)) as pool, open(args.results, "w") as out:
+    with multiprocessing.Pool(args.j, initializer=_init, initargs=(args.go_compat,)) as pool, open(args.results, "w", encoding="utf-8") as out:
         for rs in pool.imap_unordered(_run_group, _groups(jobs)):
             for r in rs:
                 out.write(json.dumps(r) + "\n")
@@ -199,7 +199,7 @@ def cmd_py(args):
 
 
 def cmd_go(args):
-    jobs = [json.loads(line) for line in open(args.jobs)]
+    jobs = [json.loads(line) for line in open(args.jobs, encoding="utf-8")]
     groups = _groups(jobs)
     chunks = [[] for _ in range(args.j)]
     for i, g in enumerate(sorted(groups, key=len, reverse=True)):
@@ -211,15 +211,15 @@ def cmd_go(args):
             if not c:
                 continue
             jf, rf = os.path.join(td, "j%d" % i), os.path.join(td, "r%d" % i)
-            with open(jf, "w") as f:
+            with open(jf, "w", encoding="utf-8") as f:
                 for j in c:
                     f.write(json.dumps(j) + "\n")
             procs.append((subprocess.Popen([args.goref, jf, rf], stdout=subprocess.DEVNULL), rf))
-        with open(args.results, "w") as out:
+        with open(args.results, "w", encoding="utf-8") as out:
             for p, rf in procs:
                 if p.wait() != 0:
                     sys.exit("goref failed")
-                with open(rf) as f:
+                with open(rf, encoding="utf-8") as f:
                     out.write(f.read())
     print("%d jobs in %.0fs" % (len(jobs), time.time() - t), file=sys.stderr)
 
@@ -241,8 +241,8 @@ def _norm(r):
 
 
 def cmd_compare(args):
-    a = {r["id"]: _norm(r) for r in map(json.loads, open(args.a))}
-    b = {r["id"]: _norm(r) for r in map(json.loads, open(args.b))}
+    a = {r["id"]: _norm(r) for r in map(json.loads, open(args.a, encoding="utf-8"))}
+    b = {r["id"]: _norm(r) for r in map(json.loads, open(args.b, encoding="utf-8"))}
     missing = sorted(set(a) ^ set(b))
     diffs = [i for i in sorted(set(a) & set(b)) if a[i] != b[i]]
     ok = sum(1 for i in a if i in b and a[i] == b[i] and "sha256" in a[i])

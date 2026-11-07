@@ -224,7 +224,7 @@ def formats_corpus(k, seed):
 
 def decode_txt_corpus():
     out = []
-    for line in DECODE_TXT.read_text().splitlines():
+    for line in DECODE_TXT.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
