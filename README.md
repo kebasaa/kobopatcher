@@ -94,10 +94,12 @@ standalone executables for Linux, macOS and Windows that don't need Python.
 Download the one for your system, make it executable (`chmod +x` on Linux and
 macOS), and use it in place of `kobopatcher` in the commands below.
 
-**Patches that change CSS (`FindZlib`, `ReplaceZlib`) need Python's zlib module
-to be the classic zlib.** That is the case for the usual Python builds and for
-the standalone executables. kobopatcher checks this itself and tells you if it
-isn't; see [Troubleshooting](#troubleshooting).
+**About CSS patches (`FindZlib`, `ReplaceZlib`):** they recompress data inside
+`nickel`, and the result has to match classic zlib byte for byte. kobopatcher
+uses Python's zlib module when it is classic zlib (most Python builds) and
+otherwise its own pure-Python copy of zlib's compressor (for example on
+Windows with Python 3.14, which uses zlib-ng). The copy gives the same bytes,
+but CSS patches then take a few seconds longer.
 
 ## Patching your Kobo, step by step
 
@@ -556,10 +558,13 @@ On your computer it only writes the output and log files named in
   group.
 - **`could not find target ... in the firmware`:** a `patches:` entry names a
   file that isn't in this firmware (typo, or a file of another model).
-- **`zlib self-test failed`:** your Python's zlib module compresses differently
-  from classic zlib (for example, a Python built with zlib-ng), so the CSS
-  instructions can't work. Use a standard Python from python.org, your Linux
-  distribution or Homebrew, or a standalone kobopatcher executable.
+- **CSS patches are slow:** your Python's zlib module isn't classic zlib (e.g.
+  zlib-ng on Windows with Python 3.14), so kobopatcher uses its pure-Python
+  compressor. The result is the same. Python 3.13 or a standalone executable
+  is faster.
+- **`zlib self-test failed`:** neither Python's zlib module nor kobopatcher's own
+  compressor produced classic zlib's output. Please report this with your
+  Python version and operating system.
 - **`could not find lrelease`:** install the Qt linguist tools, or set `lrelease:`
   in `kobopatch.yaml` to its path.
 
@@ -627,7 +632,8 @@ Patrick Gaskin, and on its patch format, patch sets and community at
 includes Python ports of
 [ianlancetaylor/demangle](https://github.com/ianlancetaylor/demangle) (BSD 3-clause),
 [rsc.io/arm/armasm](https://github.com/rsc/arm) (BSD 3-clause) and
-[riking/cssparse](https://github.com/riking/cssparse) (BSD 3-clause); their
-licenses are next to the ported code.
+[riking/cssparse](https://github.com/riking/cssparse) (BSD 3-clause), and of
+the compressor of [zlib](https://zlib.net) (zlib license); their licenses are
+next to the ported code.
 
 MIT License, see [LICENSE](LICENSE).

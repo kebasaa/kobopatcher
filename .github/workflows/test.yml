@@ -26,3 +26,17 @@ jobs:
         run: python -c "from kobopatcher.patchlib.zlibcss import zlib_selftest as t; import sys, zlib; m = t(); print('zlib', zlib.ZLIB_VERSION, m or 'ok'); sys.exit(1 if m else 0)"
       - name: Test
         run: python -m pytest -q
+
+  pure-deflate:
+    # the pure-Python compressor that replaces a non-classic zlib (zlib-ng)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install -e ".[dev]"
+      - name: Test with the pure-Python deflate
+        env:
+          KOBOPATCHER_PURE_DEFLATE: "1"
+        run: python -m pytest -q tests/test_zlibdeflate.py tests/test_patcher.py tests/test_cli.py

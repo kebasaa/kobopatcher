@@ -13,6 +13,7 @@ license-files = [
     "src/kobopatcher/patchlib/_demangle/LICENSE",
     "src/kobopatcher/patchlib/_armasm/LICENSE",
     "src/kobopatcher/patchlib/LICENSE.cssparse",
+    "src/kobopatcher/patchlib/LICENSE.zlib",
 ]
 authors = [{ name = "kebasaa" }]
 requires-python = ">=3.10"
@@ -40,7 +41,7 @@ kobopatcher-symdump = "kobopatcher.symdump:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-kobopatcher = ["patchlib/LICENSE.cssparse", "patchlib/_armasm/LICENSE", "patchlib/_demangle/LICENSE"]
+kobopatcher = ["patchlib/LICENSE.cssparse", "patchlib/LICENSE.zlib", "patchlib/_armasm/LICENSE", "patchlib/_demangle/LICENSE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
