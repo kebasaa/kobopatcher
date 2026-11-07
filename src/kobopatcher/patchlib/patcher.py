@@ -144,6 +144,25 @@ class Patcher:
         self._call_hook(pos, fbuf, rbuf)
         self.buf[idx : idx + len(fbuf)] = rbuf
 
+    def replace_text(self, find: str, replace: str, count=None) -> None:
+        """Replace text in a text file; the file may change size.
+
+        find must occur exactly once (or exactly count times). Refused on ELF
+        files, where changing the size would break every offset.
+        """
+        if self.buf[:4] == b"\x7fELF":
+            raise PatchError("ReplaceText: refusing to change the size of an ELF file (use ReplaceString)")
+        fb = find.encode("utf-8", "surrogateescape")
+        rb = replace.encode("utf-8", "surrogateescape")
+        n = self.buf.count(fb)
+        want = 1 if count is None else count
+        if n != want:
+            if n == 0:
+                raise PatchError("ReplaceText: could not find %s" % quote(find))
+            raise PatchError("ReplaceText: %s occurs %d times, expected %d" % (quote(find), n, want))
+        self._call_hook(self.buf.find(fb), fb, rb)
+        self.buf[:] = bytes(self.buf).replace(fb, rb)
+
     # --- zlib -------------------------------------------------------------
 
     def _check_zlib(self):

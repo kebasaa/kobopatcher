@@ -214,6 +214,18 @@ class PatchGroup(_Scalar):
     name, modifies = "PatchGroup", False
 
 
+class Category(_Scalar):
+    """kobopatcher extension: the menu category of the patch."""
+
+    name, modifies = "Category", False
+
+
+class Experimental(_Scalar):
+    """kobopatcher extension: marks a new patch that hasn't run on a device."""
+
+    name, modifies = "Experimental", False
+
+
 class BaseAddress(_Scalar):
     name = "BaseAddress"
 
@@ -548,6 +560,23 @@ class ReplaceZlibGroup(_Struct):
 
 
 @_struct
+class ReplaceText(_Struct):
+    """kobopatcher extension: replace text in a text file (e.g. a shell script).
+
+    Unlike ReplaceString, the replacement may be longer or shorter, so the
+    file changes size. Find must occur exactly once (or exactly Count times).
+    Refused on ELF files.
+    """
+
+    name = "ReplaceText"
+    fields = [("Find", "find", Y.String()), ("Replace", "replace", Y.String()), ("Count", "count", Y.Ptr(Y.Int(32)))]
+
+    def apply_to(self, pt, log):
+        log("ReplaceText(%s, %s, count=%s)" % (quote(self.find), quote(self.replace), self.count))
+        pt.replace_text(self.find, self.replace, self.count)
+
+
+@_struct
 class ElfClearDynFlag(_Struct):
     name = "ElfClearDynFlag"
     fields = [("Tag", "tag", Y.String()), ("Mask", "mask", Y.Int(32, True))]
@@ -717,6 +746,8 @@ for _cls, _t in [
     (Enabled, Y.Bool("kobopatch.Enabled")),
     (Description, Y.String("kobopatch.Description")),
     (PatchGroup, Y.String("kobopatch.PatchGroup")),
+    (Category, Y.String("kobopatch.Category")),
+    (Experimental, Y.Bool("kobopatch.Experimental")),
     (BaseAddress, Y.Custom("kobopatch.BaseAddress", _flex_unmarshal)),
     (FindBaseAddressHex, Y.String("kobopatch.FindBaseAddressHex")),
     (FindBaseAddressString, Y.String("kobopatch.FindBaseAddressString")),
@@ -729,6 +760,7 @@ for _cls, _t in [
     (ReplaceBytes, ReplaceBytes.T),
     (ReplaceZlib, ReplaceZlib.T),
     (ReplaceZlibGroup, ReplaceZlibGroup.T),
+    (ReplaceText, ReplaceText.T),
     (ElfClearDynFlag, ElfClearDynFlag.T),
     (ElfRemoveDynEntry, ElfRemoveDynEntry.T),
     (ElfDisableProgramHeader, ElfDisableProgramHeader.T),
@@ -778,6 +810,8 @@ class ParsedPatch:
         self.enabled = False
         self.description = ""
         self.patch_groups = []
+        self.category = ""
+        self.experimental = False
         self.instructions = []
 
 
@@ -896,6 +930,11 @@ class PatchSet:
                             raise KobopatchError("%s: %s: replacement string %d chars too short" % (pfx, i.name, -d))
                         if d > 0:
                             raise KobopatchError("%s: %s: replacement string %d chars too long" % (pfx, i.name, d))
+                elif isinstance(i, ReplaceText):
+                    if i.find == "":
+                        raise KobopatchError("%s: ReplaceText: Find must not be empty" % pfx)
+                    if i.count is not None and i.count < 1:
+                        raise KobopatchError("%s: ReplaceText: Count must be at least 1" % pfx)
                 elif isinstance(i, FindZlibHash):
                     if len(i.value.encode("utf-8", "surrogateescape")) != 40:
                         raise KobopatchError("%s: FindZlibHash: hash must be 40 chars long" % pfx)
@@ -974,6 +1013,10 @@ def parse(buf: bytes) -> PatchSet:
                 p.description = value
             elif cls is PatchGroup:
                 p.patch_groups.append(value)
+            elif cls is Category:
+                p.category = value
+            elif cls is Experimental:
+                p.experimental = bool(value)
             else:
                 inst = value if isinstance(value, Instruction) else cls(value)
                 p.instructions.append(ParsedInstruction(i + 1, ln, inst))

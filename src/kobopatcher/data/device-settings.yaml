@@ -1,0 +1,80 @@
+# Settings in .kobo/Kobo/Kobo eReader.conf that kobopatcher device settings
+# can switch on and off. Switching one off removes its keys again, which
+# restores the firmware's default. Sources: the Kobo Aura H2O docs
+# (kobo_aura_h2o/docs, FPB = firmware-performance-and-bugs.md,
+# FR = firmware-report.md, CW = calibre-web-store-integration.md).
+
+- id: quiet-ui-logging
+  name: Quieter UI logging
+  category: Performance
+  description: >-
+    The "ui" and "usertrace" log categories start at debug level, so about 267
+    functions format a message for every UI action. This sets them to warning
+    level, like all other categories. (FPB §4.6, fix A)
+  set:
+    - {section: DeveloperSettings, key: Log, value: '"ui.debug=false;usertrace.debug=false"'}
+
+- id: no-reading-stats
+  name: Don't collect reading statistics
+  category: Performance
+  description: >-
+    Stops optional analytics events, which pile up without limit on a device
+    that never syncs (Settings → Reading stats does the same). (FPB §4.4)
+  set:
+    - {section: ReadingLife, key: StatsTrackingEnabled, value: "false"}
+
+- id: no-periodic-sync
+  name: No automatic daily sync
+  category: Power
+  description: >-
+    Stops the daily automatic sync and the wake-ups it causes. Leave this off if
+    you sync automatically with Calibre-Web. (FPB §4.9)
+  set:
+    - {section: ApplicationPreferences, key: PeriodicAutoSync, value: "false"}
+
+- id: no-reagl
+  name: Turn off REAGL page turns (A/B test)
+  category: Reading
+  description: >-
+    Uses the normal e-ink waveform instead of REAGL for page turns. Meant as an
+    A/B test: turn 20 pages with and without it and keep what feels faster.
+    (FPB R2)
+  set:
+    - {section: Reading, key: disableRegal, value: "true"}
+
+- id: no-forced-gc16
+  name: Fewer full refreshes on illustrated pages
+  category: Reading
+  description: >-
+    Stops forcing a full (flashing) refresh on pages with images; more ghosting.
+    (FPB §4.7)
+  set:
+    - {section: Reading, key: disableForcedGC16, value: "true"}
+
+- id: cover-sleep-screen
+  name: Show the book cover full-screen when asleep
+  category: Look
+  description: >-
+    Needed for custom sleep images in .kobo/screensaver as well. (AD §5.1)
+  set:
+    - {section: PowerOptions, key: ShowBookCover, value: "true"}
+    - {section: PowerOptions, key: FullscreenCoverStretch, value: "true"}
+
+- id: ignore-captive-portal
+  name: Use Wi-Fi without internet access
+  category: Network
+  description: >-
+    Don't treat a network without internet (e.g. a home server only) as a
+    captive portal. (CW §8)
+  set:
+    - {section: FeatureSettings, key: IgnoreCaptivePortal, value: "true"}
+
+- id: calibre-web-store
+  name: Use a Calibre-Web server as store and sync
+  category: Network
+  description: >-
+    Points the store and sync at your Calibre-Web server. Edit the value to
+    https://YOUR-SERVER/kobo/YOUR-TOKEN. Rebuild the secure database first
+    (device db --run secure-db-rebuild). Lost on a factory reset. (CW §2)
+  value:
+    {section: OneStoreServices, key: api_endpoint, placeholder: "https://YOUR-SERVER/kobo/YOUR-TOKEN"}
