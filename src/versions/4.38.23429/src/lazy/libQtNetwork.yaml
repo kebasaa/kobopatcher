@@ -1,0 +1,9 @@
+# usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtNetwork.so.4.6.2 (4.38.23429)
+
+Lazy binding like firmware 4.7:
+  - Enabled: no
+  - Description: |
+      Binds the 604 imported functions of this library on first use instead of
+      all at process start (DF_1_NOW cleared, DT_BIND_NOW removed, PT_GNU_RELRO
+      disabled so that the GOT stays writable). UNTESTED on the device.
+  - ElfLazyBinding: true

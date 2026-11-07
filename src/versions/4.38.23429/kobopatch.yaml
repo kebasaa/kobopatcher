@@ -1,0 +1,46 @@
+# kobopatch.yaml for firmware 4.38.23429 (Kobo Aura H2O, N250). Requires
+# kobopatcher (ElfLazyBinding, StubFunction, NopCall, Tombstone).
+# All patches are disabled by default and UNTESTED on the device; enable them in
+# the src/ files or below with overrides. See README.md.
+version: 4.38.23429
+in: kobo-update-4.38.23429.zip # or pass --firmware
+out: out/KoboRoot.tgz
+log: out/log.txt
+patchFormat: kobopatch
+
+patches:
+  src/libnickel.yaml:                            usr/local/Kobo/libnickel.so.1.0.0
+  src/lazy/libiwnn.yaml:                         usr/local/Kobo/libiwnn.so.1.0.0
+  src/lazy/libQtSolutions_IOCompressor-2.3.yaml: usr/local/Kobo/libQtSolutions_IOCompressor-2.3.so.1.0.0
+  src/lazy/librmsdk.yaml:                        usr/local/Kobo/librmsdk.so.1.0.0
+  src/lazy/libsunpinyin.yaml:                    usr/local/Kobo/libsunpinyin.so.3.0.0
+  src/lazy/libQtConcurrent.yaml:                 usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtConcurrent.so.4.6.2
+  src/lazy/libQtCore.yaml:                       usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtCore.so.4.6.2
+  src/lazy/libQtDBus.yaml:                       usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtDBus.so.4.6.2
+  src/lazy/libQtGui.yaml:                        usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtGui.so.4.6.2
+  src/lazy/libQtMultimedia.yaml:                 usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtMultimedia.so.4.6.2
+  src/lazy/libQtMultimediaWidgets.yaml:          usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtMultimediaWidgets.so.4.6.2
+  src/lazy/libQtNetwork.yaml:                    usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtNetwork.so.4.6.2
+  src/lazy/libQtPrintSupport.yaml:               usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtPrintSupport.so.4.6.2
+  src/lazy/libQtScript.yaml:                     usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtScript.so.4.6.2
+  src/lazy/libQtSensors.yaml:                    usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtSensors.so.4.6.2
+  src/lazy/libQtSql.yaml:                        usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtSql.so.4.6.2
+  src/lazy/libQtSvg.yaml:                        usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtSvg.so.4.6.2
+  src/lazy/libQtWebKit.yaml:                     usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtWebKit.so.4.6.2
+  src/lazy/libQtWebKitWidgets.yaml:              usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtWebKitWidgets.so.4.6.2
+  src/lazy/libQtWidgets.yaml:                    usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtWidgets.so.4.6.2
+  src/lazy/libQtXmlPatterns.yaml:                usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtXmlPatterns.so.4.6.2
+  src/lazy/libQtXml.yaml:                        usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtXml.so.4.6.2
+  src/tombstone/libboggle.yaml:                  usr/local/Kobo/libboggle.so
+  src/tombstone/librushhour.yaml:                usr/local/Kobo/librushhour.so
+  src/tombstone/libsolitaire.yaml:               usr/local/Kobo/libsolitaire.so
+  src/tombstone/libsudoku.yaml:                  usr/local/Kobo/libsudoku.so
+  src/tombstone/libscribble.yaml:                usr/local/Kobo/libscribble.so
+  src/tombstone/libwikipedia.yaml:               usr/local/Kobo/libwikipedia.so
+  src/tombstone/libpdb.yaml:                     usr/local/Kobo/libpdb.so
+  src/tombstone/libsandbox.yaml:                 usr/local/Kobo/libsandbox.so
+
+overrides:
+  # Example (device test ladder, step 1):
+  # src/libnickel.yaml:
+  #   Disable Kobo Plus promo check on Home: yes

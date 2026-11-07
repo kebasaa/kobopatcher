@@ -1,0 +1,87 @@
+name: release
+
+# Builds the sdist, the wheel and standalone executables, and attaches them to
+# a GitHub release for the given tag.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0); created if it doesn't exist"
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install build && python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+  binaries:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, name: linux-x64}
+          - {os: ubuntu-24.04-arm, name: linux-arm64}
+          - {os: macos-latest, name: macos-arm64}
+          - {os: macos-13, name: macos-x64}
+          - {os: windows-latest, name: windows-x64}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # a Python whose zlib is classic zlib (checked below)
+          python-version: "3.13"
+      - name: Install
+        run: python -m pip install . pyinstaller
+      - name: Build
+        shell: bash
+        run: |
+          for cmd in kobopatcher kobopatcher-apply kobopatcher-cssextract kobopatcher-symdump; do
+            mod=$(python -c "import sys; print({'kobopatcher':'cli','kobopatcher-apply':'apply_cli','kobopatcher-cssextract':'cssextract','kobopatcher-symdump':'symdump'}[sys.argv[1]])" $cmd)
+            printf 'import sys\nfrom kobopatcher.%s import main\nsys.exit(main())\n' "$mod" > "entry_$mod.py"
+            pyinstaller --onefile --console --name "$cmd-${{ matrix.name }}" --collect-submodules kobopatcher --collect-data kobopatcher "entry_$mod.py"
+          done
+      - name: Smoke test and zlib self-test
+        shell: bash
+        run: |
+          ext=""; [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
+          ./dist/kobopatcher-${{ matrix.name }}$ext --version
+          python -c "from kobopatcher.patchlib.zlibcss import zlib_selftest as t; import sys; m = t(); print(m or 'zlib ok'); sys.exit(1 if m else 0)"
+          printf 'version: x\nin: none.zip\nout: o.tgz\nlog: l.txt\n' > smoke.yaml
+          ./dist/kobopatcher-${{ matrix.name }}$ext smoke.yaml && exit 1 || echo "expected failure (no firmware)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ matrix.name }}
+          path: dist/kobopatcher*
+
+  release:
+    needs: [dist, binaries]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: artifacts/*
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.tag }}" --repo "${{ github.repository }}" --target "${{ github.sha }}" --title "${{ inputs.tag }}" --generate-notes artifacts/*

@@ -1,0 +1,32 @@
+name: test-patches
+
+# Applies every patch of the latest kobopatch-patches release, one at a time,
+# to the binaries in kobopatch-testdata (like kobopatch's own CI).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-patches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install
+        run: python -m pip install .
+      - name: Get kobopatch-patches (latest release)
+        run: |
+          tag=$(curl -fsSL https://api.github.com/repos/pgaskin/kobopatch-patches/releases/latest | python -c "import json,sys; print(json.load(sys.stdin)['tag_name'])")
+          git clone --depth 1 --branch "$tag" https://github.com/pgaskin/kobopatch-patches.git patches
+      - name: Get kobopatch-testdata
+        run: git clone --depth 1 --branch v1 https://github.com/pgaskin/kobopatch-testdata.git testdata
+      - name: Test all patches
+        run: python tools/test_patches.py --patches patches --testdata testdata

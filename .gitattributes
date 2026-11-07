@@ -1,0 +1,5 @@
+# keep test data and patch files byte-exact on every platform
+tests/testdata/** -text
+*.yaml text eol=lf
+*.patch text eol=lf
+*.ts text eol=lf

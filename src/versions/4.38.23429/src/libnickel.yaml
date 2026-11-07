@@ -1,0 +1,36 @@
+# usr/local/Kobo/libnickel.so.1.0.0 (4.38.23429)
+
+Lazy binding like firmware 4.7:
+  - Enabled: no
+  - Description: |
+      Binds the 24442 imported functions of this library on first use instead of
+      all at process start (DF_1_NOW cleared, DT_BIND_NOW removed, PT_GNU_RELRO
+      disabled so that the GOT stays writable). UNTESTED on the device.
+  - ElfLazyBinding: true
+
+Disable sketch overlay timer on page turn:
+  - Enabled: no
+  - Description: |
+      ReadingView::nextPage/prevPage call SketchNote::disableWithTimer(int) on
+      every page turn (a QTimer::singleShot(100) and a heap allocation for the
+      stylus annotation overlay, which this device does not have). Verify that
+      highlights can still be created. UNTESTED on the device.
+  - NopCall: {Sym: _ZN11ReadingView8nextPageEv, Rel: 0xc, Target: _ZN10SketchNote16disableWithTimerEi}
+  - NopCall: {Sym: _ZN11ReadingView8prevPageEv, Rel: 0xc, Target: _ZN10SketchNote16disableWithTimerEi}
+
+Disable forced full refresh on PDF page turn:
+  - Enabled: no
+  - Description: |
+      Removes the QWidget::setAttribute call which forces a full (flashing)
+      refresh on every PDF page turn. Optional: PDF pages will show more
+      ghosting. UNTESTED on the device.
+  - NopCall: {Sym: _ZN11ReadingView8nextPageEv, Rel: 0x1e, Target: _ZN7QWidget12setAttributeEN2Qt15WidgetAttributeEb}
+  - NopCall: {Sym: _ZN11ReadingView8prevPageEv, Rel: 0x1e, Target: _ZN7QWidget12setAttributeEN2Qt15WidgetAttributeEb}
+
+Disable Kobo Plus promo check on Home:
+  - Enabled: no
+  - Description: |
+      HomePageController::maybeShowKoboPlusPromo runs two database queries every
+      time Home is shown. This makes it return immediately (no promo dialog).
+      UNTESTED on the device.
+  - StubFunction: {Sym: _ZN18HomePageController22maybeShowKoboPlusPromoEv, Return: void}
