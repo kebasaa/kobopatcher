@@ -159,6 +159,12 @@ class Patcher:
         from .css import is_css
 
         self._check_zlib()
+        # FindZlib/FindZlibHash extract every stream each time; cache the
+        # result for the current content of the buffer
+        key = hashlib.sha1(self.buf).digest()
+        cached = getattr(self, "_zlib_cache", None)
+        if cached is not None and cached[0] == key:
+            return [ZlibItem(z.offset, z.css) for z in cached[1]]
         items = []
         buf = self.buf
         i = buf.find(b"\x78\x9c")
@@ -183,7 +189,8 @@ class Patcher:
                         )
                     items.append(ZlibItem(i, css))
             i = buf.find(b"\x78\x9c", i + 1)
-        return items
+        self._zlib_cache = (key, items)
+        return [ZlibItem(z.offset, z.css) for z in items]
 
     def find_zlib(self, find: str) -> None:
         """Move cur to the CSS zlib stream containing find (not sensitive to whitespace)."""
@@ -445,7 +452,7 @@ class Patcher:
         Warning: all symbols are off by one (the raw st_value, Thumb bit
         included) for historical reasons. Deprecated: use resolve_sym.
         """
-        from ._demangle import DemangleError, to_string
+        from .demangled import demangle
         from .elffile import ElfFile
 
         try:
@@ -457,9 +464,8 @@ class Patcher:
         except Exception as ex:  # noqa: BLE001
             raise PatchError("FindBaseAddressSymbol: could not read dynsyms: %s" % ex) from None
         for sym in syms:
-            try:
-                name = to_string(sym.name)
-            except DemangleError:
+            name = demangle(sym.name)
+            if name is None:
                 name = sym.name
             if find != "" and find == name:
                 self.cur = sym.value & 0xFFFFFFFF

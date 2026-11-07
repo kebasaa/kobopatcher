@@ -290,16 +290,11 @@ def elf_sym(p, name: str) -> ElfSym:
     syms = p.elf_syms
     match = [s for s in syms if s.name == name]
     if not match:
-        from ._demangle import DemangleError, to_string
+        from .demangled import demangle
 
         dm = getattr(syms, "demangled", None)
         if dm is None:
-            dm = []
-            for s in syms:
-                try:
-                    dm.append(to_string(s.name))
-                except DemangleError:
-                    dm.append(None)
+            dm = [demangle(s.name) for s in syms]
             if isinstance(syms, _SymList):
                 syms.demangled = dm
         match = [s for s, d in zip(syms, dm) if d is not None and d == name]

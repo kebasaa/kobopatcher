@@ -62,7 +62,7 @@ def _check_arm32(e: ElfFile):
 
 
 def decdynsym(e: ElfFile, skip_pltgot: bool):
-    from ._demangle import DemangleError, to_string
+    from .demangled import demangle
 
     _check_arm32(e)
     try:
@@ -73,10 +73,7 @@ def decdynsym(e: ElfFile, skip_pltgot: bool):
     for i, s in enumerate(edynsyms):
         if s.name == "":
             continue  # unnamed symbols (usually _init and similar)
-        try:
-            dm = to_string(s.name)
-        except DemangleError:
-            dm = ""
+        dm = demangle(s.name) or ""
         dynsyms.append(
             Dynsym(
                 name=s.name,
