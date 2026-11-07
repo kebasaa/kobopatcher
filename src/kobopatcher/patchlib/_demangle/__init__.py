@@ -107,11 +107,20 @@ def _checked_deep(name: str) -> str:
         except (ValueError, RuntimeError):  # pragma: no cover
             old_size = None
         try:
-            try:
-                threading.stack_size(_DEEP_STACK_SIZE)
-            except (ValueError, RuntimeError):  # pragma: no cover
-                pass
-            sys.setrecursionlimit(max(old_limit, _DEEP_RECURSION_LIMIT))
+            # Windows allows at most 256 MiB per thread; take the largest
+            # size the platform accepts and scale the recursion limit to it
+            granted = 0
+            for size in (_DEEP_STACK_SIZE, _DEEP_STACK_SIZE // 2, _DEEP_STACK_SIZE // 8):
+                try:
+                    threading.stack_size(size)
+                    granted = size
+                    break
+                except (ValueError, RuntimeError):  # pragma: no cover
+                    continue
+            if not granted:  # pragma: no cover
+                raise DemangleError("recursion too deep")
+            limit = _DEEP_RECURSION_LIMIT * granted // _DEEP_STACK_SIZE
+            sys.setrecursionlimit(max(old_limit, limit))
             t = threading.Thread(target=target, name="demangle-deep")
             t.start()
             t.join()

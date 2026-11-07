@@ -530,7 +530,10 @@ CSS = "body {\n  margin: 0;\n  color: black;\n}\n"
 
 
 def zbuf():
-    return b"PAD" * 4 + zlib.compress(CSS.encode()) + b"\x00" * 8
+    # kobopatcher's compressor, i.e. classic zlib (Python's zlib may be zlib-ng)
+    from kobopatcher.patchlib.zlibcss import compress
+
+    return b"PAD" * 4 + compress(CSS.encode()) + b"\x00" * 8
 
 
 def test_apply_zlib(both_modes):
