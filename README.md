@@ -603,6 +603,9 @@ these deliberate changes:
    Windows (kobopatcher is a terminal program).
 10. Error messages show values instead of Go pointer addresses, and YAML syntax
     errors are worded by PyYAML.
+11. C++ names nested more than a few thousand levels deep can't be demangled on
+    Windows (Python's stack is smaller there); no real symbol is nested that
+    deeply.
 
 The banner and help name kobopatcher instead of kobopatch.
 

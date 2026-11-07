@@ -1,7 +1,8 @@
 name: release
 
-# Builds the sdist, the wheel and standalone executables, and attaches them to
-# a GitHub release for the given tag.
+# Builds the sdist, the wheel and standalone executables. On a manual run they
+# are attached to a GitHub release for the given tag; on pull requests they are
+# only built (and kept as workflow artifacts) to check that packaging works.
 
 on:
   workflow_dispatch:
@@ -9,11 +10,11 @@ on:
       tag:
         description: "Tag to release (e.g. v0.1.0); created if it doesn't exist"
         required: true
+  pull_request:
+    paths: ["src/kobopatcher/**", "pyproject.toml", ".github/workflows/release.yml"]
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 jobs:
   dist:
@@ -37,7 +38,7 @@ jobs:
           - {os: ubuntu-latest, name: linux-x64}
           - {os: ubuntu-24.04-arm, name: linux-arm64}
           - {os: macos-latest, name: macos-arm64}
-          - {os: macos-13, name: macos-x64}
+          - {os: macos-15-intel, name: macos-x64}
           - {os: windows-latest, name: windows-x64}
     runs-on: ${{ matrix.os }}
     steps:
@@ -63,15 +64,21 @@ jobs:
           ./dist/kobopatcher-${{ matrix.name }}$ext --version
           python -c "from kobopatcher.patchlib.zlibcss import zlib_selftest as t; import sys; m = t(); print(m or 'zlib ok'); sys.exit(1 if m else 0)"
           printf 'version: x\nin: none.zip\nout: o.tgz\nlog: l.txt\n' > smoke.yaml
-          ./dist/kobopatcher-${{ matrix.name }}$ext smoke.yaml && exit 1 || echo "expected failure (no firmware)"
+          if ./dist/kobopatcher-${{ matrix.name }}$ext smoke.yaml; then echo "should have failed (no firmware)"; exit 1; fi
+          ./dist/kobopatcher-apply-${{ matrix.name }}$ext --help || true
       - uses: actions/upload-artifact@v4
         with:
           name: bin-${{ matrix.name }}
           path: dist/kobopatcher*
 
   release:
+    if: github.event_name == 'workflow_dispatch'
     needs: [dist, binaries]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/download-artifact@v4
         with:
