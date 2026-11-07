@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kobopatcher"
+version = "0.1.0"
+description = "Command-line patcher for Kobo eReader firmware (Python reimplementation of kobopatch)"
+readme = "README.md"
+license = "MIT"
+license-files = [
+    "LICENSE",
+    "src/kobopatcher/patchlib/_demangle/LICENSE",
+    "src/kobopatcher/patchlib/_armasm/LICENSE",
+    "src/kobopatcher/patchlib/LICENSE.cssparse",
+]
+authors = [{ name = "kebasaa" }]
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0"]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Disassemblers",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/kebasaa/kobopatcher"
+
+[project.scripts]
+kobopatcher = "kobopatcher.cli:main"
+kobopatcher-apply = "kobopatcher.apply_cli:main"
+kobopatcher-cssextract = "kobopatcher.cssextract:main"
+kobopatcher-symdump = "kobopatcher.symdump:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+kobopatcher = ["patchlib/LICENSE.cssparse", "patchlib/_armasm/LICENSE", "patchlib/_demangle/LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
