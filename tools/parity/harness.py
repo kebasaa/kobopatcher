@@ -43,6 +43,8 @@ def gen_jobs(args):
             continue
         vdir = os.path.join(vroot, ver)
         for bindir in sorted(os.listdir(vdir)):
+            if not os.path.isdir(os.path.join(vdir, bindir)):
+                continue
             member = bindir[: -len(".yaml")] if bindir.endswith(".yaml") else bindir
             for f in sorted(os.listdir(os.path.join(vdir, bindir))):
                 path = os.path.join(vdir, bindir, f)

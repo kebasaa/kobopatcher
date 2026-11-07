@@ -148,6 +148,14 @@ class OutputTgz:
         ti.mtime = int(time.time())
         self._write(ti, b"", _fmt_for(name, target))
 
+    def discard(self) -> None:
+        """Drop an unfinished archive (after an error)."""
+        if not self._gz.closed:
+            try:
+                self._gz.close()
+            except (OSError, ValueError):
+                pass
+
     def finish(self) -> bytes:
         # end of archive: two zero blocks, no padding to a full record (like Go)
         self._gz.write(b"\x00" * (2 * tarfile.BLOCKSIZE))

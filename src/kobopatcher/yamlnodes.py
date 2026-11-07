@@ -120,6 +120,8 @@ def parse(buf):
 def _pyyaml_msg(e) -> str:
     mark = getattr(e, "problem_mark", None)
     problem = getattr(e, "problem", None) or str(e)
+    # word the most common one (a tab) like libyaml/yaml.v3
+    problem = re.sub(r"found character '.*' that cannot start any token", "found character that cannot start any token", problem)
     if mark is not None:
         return "line %d: %s" % (mark.line + 1, problem)
     return problem

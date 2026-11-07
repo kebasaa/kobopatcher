@@ -70,6 +70,15 @@ class Patcher:
                 raise GoPanic("runtime error: slice bounds out of range [%d:]" % off)
             raise PatchError("%s: offset before start of buf" % what)
 
+    def _pos(self, offset: int) -> int:
+        """cur + offset (kobopatch computed it in int32, which wraps around)."""
+        pos = self.cur + offset
+        if go_compat():
+            pos &= 0xFFFFFFFF
+            if pos & 0x80000000:
+                pos -= 1 << 32
+        return pos
+
     def base_address(self, offset: int) -> None:
         if offset < 0:
             raise PatchError("BaseAddress: offset less than 0")
@@ -119,7 +128,7 @@ class Patcher:
             raise PatchError("%s: %s" % (what, e)) from None
 
     def _replace_value(self, offset, fbuf, rbuf, strict, what):
-        pos = self.cur + offset
+        pos = self._pos(offset)
         if len(self.buf) < pos:
             raise PatchError("offset past end of buf")
         if len(fbuf) != len(rbuf):
@@ -222,7 +231,7 @@ class Patcher:
 
     def find_zlib_hash(self, hash_: str) -> None:
         """Move cur to the CSS zlib stream with this SHA1 (see kobopatcher-cssextract)."""
-        if len(hash_) != 40:
+        if len(hash_.encode("utf-8", "surrogateescape")) != 40:
             raise PatchError("FindZlibHash: invalid hash")
         try:
             z = self.extract_zlib()
@@ -241,7 +250,10 @@ class Patcher:
     def replace_zlib_group(self, offset: int, repl) -> None:
         """Replace parts of the CSS zlib stream at cur+offset, all at once."""
         self._check_zlib()
-        pos = self.cur + offset
+        pos = self._pos(offset)
+        if go_compat() and pos + 2 < 0:
+            # Go checks the upper bound of buf[pos:pos+2] first
+            raise GoPanic("runtime error: slice bounds out of range [:%d]" % (pos + 2))
         self._check_start(pos, "ReplaceZlib")
         if self.buf[pos : pos + 2] != b"\x78\x9c":
             if len(self.buf) < pos + 2 and go_compat():

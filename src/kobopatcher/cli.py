@@ -386,6 +386,13 @@ def _run(cfg, args, d) -> int:
         return 0
 
     k.out = firmware.OutputTgz()
+    try:
+        return _apply_all(k, cfg)
+    finally:
+        k.out.discard()
+
+
+def _apply_all(k, cfg) -> int:
     for step, what in (
         (k.apply_patches, "apply patches"),
         (k.apply_translations, "apply translations"),

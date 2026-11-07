@@ -48,14 +48,25 @@ class silenced:
         _silent = self._old
 
 
-def get_formats():
-    from . import kobopatch, patch32lsb
+FORMATS = ("kobopatch", "patch32lsb")
 
-    return {"kobopatch": kobopatch.parse, "patch32lsb": patch32lsb.parse}
+
+def get_formats():
+    """The names of the patch formats."""
+    return list(FORMATS)
 
 
 def get_format(name):
-    return get_formats().get(name)
+    """The parse function of a format, or None."""
+    if name == "kobopatch":
+        from . import kobopatch
+
+        return kobopatch.parse
+    if name == "patch32lsb":
+        from . import patch32lsb
+
+        return patch32lsb.parse
+    return None
 
 
 def read_from_file(fmt: str, filename: str):
