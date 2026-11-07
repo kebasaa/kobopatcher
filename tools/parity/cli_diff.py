@@ -66,6 +66,8 @@ def _sort_overrides(s):
 
 def _norm_out(s, td):
     s = _sort_overrides(s)
+    # also printed in Go map order
+    s = re.sub(r"expected one of ([\w, ]+)", lambda m: "expected one of " + ", ".join(sorted(m.group(1).split(", "))), s)
     s = _BANNER.sub("", s, count=1)
     s = s.replace(td, "TMP")
     s = re.sub(r"\(\*([\w.]+)\)\(0x[0-9a-f]+\)", r"(*\1)(PTR)", s)
