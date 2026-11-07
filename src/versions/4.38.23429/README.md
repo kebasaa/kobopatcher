@@ -6,8 +6,8 @@
 These patches switch off work that this device cannot use. They are the
 patches from §4.1–§4.3 of `docs/kobopatch-extensions.md` in
 [kebasaa/kobo_aura_h2o](https://github.com/kebasaa/kobo_aura_h2o), written
-with the structure-aware instructions of this fork (`ElfLazyBinding`,
-`StubFunction`, `NopCall`, `Tombstone`), so upstream kobopatch cannot apply them.
+with kobopatcher's structure-aware instructions (`ElfLazyBinding`,
+`StubFunction`, `NopCall`, `Tombstone`), so the original kobopatch cannot apply them.
 
 | File | Patch | What it does |
 |---|---|---|
@@ -33,12 +33,14 @@ hardening and still gains nothing. `ElfLazyBinding` also removes `DT_BIND_NOW`.
 ## Usage
 
 ```sh
-go build -o kobopatch ./kobopatch            # from the root of this repository
 cd src/versions/4.38.23429
-../../../kobopatch --check-elf -f /path/to/kobo-update-4.38.23429.zip kobopatch.yaml
+kobopatcher --check-elf -f /path/to/kobo-update-4.38.23429.zip
 ```
 
 The output goes to `out/KoboRoot.tgz`, with a verbose log in `out/log.txt`.
+To install it on the device (and to undo it), follow
+[Installing the patched firmware on the device](../../../README.md#installing-the-patched-firmware-on-the-device)
+in the main README.
 Enable patches with `Enabled: yes` in the `src/` files, or without editing them
 via `overrides:` in `kobopatch.yaml`:
 

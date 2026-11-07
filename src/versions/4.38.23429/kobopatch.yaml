@@ -1,5 +1,5 @@
-# kobopatch.yaml for firmware 4.38.23429 (Kobo Aura H2O, N250). Requires the
-# extended kobopatch (ElfLazyBinding, StubFunction, NopCall, Tombstone).
+# kobopatch.yaml for firmware 4.38.23429 (Kobo Aura H2O, N250). Requires
+# kobopatcher (ElfLazyBinding, StubFunction, NopCall, Tombstone).
 # All patches are disabled by default and UNTESTED on the device; enable them in
 # the src/ files or below with overrides. See README.md.
 version: 4.38.23429
