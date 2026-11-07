@@ -1,9 +1,0 @@
-# usr/local/Kobo/libsandbox.so (4.38.23429)
-
-Do not load this plugin:
-  - Enabled: no
-  - Description: |
-      Developer sandbox reader. Replaces the plugin with a 0-byte file (like Kobo's own libchess.so),
-      so nickel no longer dlopens it at the first sideload scan of every boot.
-      Its Beta Features entry stops working. UNTESTED on the device.
-  - Tombstone: usr/local/Kobo/libsandbox.so

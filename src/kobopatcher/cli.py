@@ -401,6 +401,15 @@ def _main(argv=None) -> int:
         if rc is not None:
             return rc
 
+    if not go_compat():
+        # kobopatch required out/ and the log's folder to exist already
+        for path in (cfg.log, cfg.out):
+            folder = os.path.dirname(path)
+            if folder and not os.path.isdir(folder):
+                try:
+                    os.makedirs(folder, exist_ok=True)
+                except OSError:
+                    pass
     try:
         lf = open(cfg.log, "w", encoding="utf-8")
     except OSError as e:

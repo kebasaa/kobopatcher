@@ -35,7 +35,9 @@ It runs in a terminal on Linux, macOS and Windows.
 - [Patch files](#patch-files)
 - [Testing patches](#testing-patches)
 - [Translations, extra files and symlinks](#translations-extra-files-and-symlinks)
-- [The 4.38.23429 patch set in this repository](#the-43823429-patch-set-in-this-repository)
+- [Choosing patches](#choosing-patches)
+- [Device settings and database maintenance](#device-settings-and-database-maintenance)
+- [Patch sets in this repository](#patch-sets-in-this-repository)
 - [FAQ](#faq)
 - [Troubleshooting](#troubleshooting)
 - [Differences from kobopatch](#differences-from-kobopatch)
@@ -117,8 +119,9 @@ files. Use one of these:
   [kobopatch-patches releases](https://github.com/pgaskin/kobopatch-patches/releases)
   and unzip it. It contains `kobopatch.yaml` and `src/`. (It also contains
   scripts and binaries of the original kobopatch, which you don't need.)
-- **A set from this repository**, e.g. [`src/versions/4.38.23429`](src/versions/4.38.23429)
-  (see [below](#the-43823429-patch-set-in-this-repository)).
+- **A set from this repository**: [`src/versions/4.38.23429`](src/versions/4.38.23429)
+  or [`src/versions/4.38.23852`](src/versions/4.38.23852), for firmware the
+  community sets don't cover (see [below](#patch-sets-in-this-repository)).
 - **Your own**, written as described in [Patch files](#patch-files).
 
 If there is no patch set for your exact version, don't use one for a nearby
@@ -143,8 +146,22 @@ it anywhere and pass it with `-f`, see step 5.)
 
 ### 4. Choose your patches
 
-Open the patch files in `src/` with a text editor. Each patch starts with its
-name and has a `Description` saying what it does:
+The easiest way is the menu. In the patch set's folder, run:
+
+```bash
+kobopatcher --select
+```
+
+It lists every patch, grouped by category. Move with the arrow keys, read the
+description at the bottom (or on the right), switch patches on and off with
+**Space**, and press **s** to save your choice (or **p** to save and patch right
+away). Patches marked **NEW** are experimental: they haven't been run on a
+device yet. When two patches can't be on together, switching one on switches
+the other off. See [Choosing patches](#choosing-patches) for the keys and the
+command-line options.
+
+You can also edit the patch files in `src/` with a text editor. Each patch
+starts with its name and has a `Description` saying what it does:
 
 ```yaml
 My 10 line spacing values:
@@ -227,6 +244,14 @@ kobopatcher --check-elf
    `KOBOeReader` drive, so that it is at `KOBOeReader/.kobo/KoboRoot.tgz`. Don't
    rename it, don't unpack it, and don't put it anywhere else.
 
+   kobopatcher can do this for you and check the firmware version first:
+
+   ```bash
+   kobopatcher device install --config kobopatch.yaml
+   ```
+
+   Otherwise copy it yourself:
+
    From a terminal, for example:
 
    ```bash
@@ -283,11 +308,46 @@ kobopatcher [OPTIONS] [CONFIG_FILE]
 | `-f FILE`, `--firmware FILE` | Use this firmware instead of the one in `in:`. Either a firmware update zip, or a `.tar.xz` from [kobopatch-testdata](https://github.com/pgaskin/kobopatch-testdata) (a flat archive of the binaries, used for testing patches without the full firmware). |
 | `-t`, `--run-tests` | Don't build a `KoboRoot.tgz`. Instead apply every patch of every patch file **on its own** to a fresh copy of its target and report which ones apply (✔) and which fail (✕), with the errors at the end. Useful to check a patch set against a firmware version. Only works with YAML patch files. Exits with status 1 if any patch fails. |
 | `--check-elf` | After patching each program or library, parse it again and check that it is still well-formed: same size and headers, intact dynamic section and symbol tables, and consistent binding (eager binding and RELRO removed together, never one without the other), and that every stubbed function and removed call is still in place. Prints `CHECK-ELF ok` per file. Recommended when you use the ELF instructions. |
+| `--list` | List every patch of the set by category: `[x]` on, `[ ]` off, its id, name, the files it patches, its group and NEW/EXPERIMENTAL. Add `--json` for JSON. Doesn't patch. |
+| `--select` | Choose patches in an interactive menu (see [Choosing patches](#choosing-patches)). **s** saves the choice to `kobopatch.yaml`; **p** saves and patches. |
+| `--enable PATCH` | Switch a patch on for this run. `PATCH` is its id (from `--list`) or name; `*` and `?` are wildcards. Repeatable. Switching on a patch switches off the others in its group. |
+| `--disable PATCH` | Switch a patch off for this run. Repeatable. |
+| `--only PATCH` | Switch every patch off except these. Repeatable. |
+| `--save` | Write the choice made with `--enable`/`--disable`/`--only` to the `overrides:` of `kobopatch.yaml` (with a backup, `kobopatch.yaml.bak`), so later runs use it too. |
 | `--version` | Print the version and exit. |
 | `-h`, `--help` | Show the help text and exit. |
 
 Exit status: 0 on success, 1 on an error (the message starts with `Error:`),
 2 for invalid command-line options.
+
+Examples:
+
+```bash
+kobopatcher --list                                  # what's in the set
+kobopatcher --enable custom-font-sizes --save       # remember a choice
+kobopatcher --only "lazy*" --check-elf              # a run with only those patches
+```
+
+### kobopatcher device
+
+Works with a Kobo connected over USB (tap **Connect** on it first). kobopatcher
+finds the `KOBOeReader` drive by itself; `--mount PATH` names it if it doesn't.
+Everything that changes the Kobo shows what it will do and asks first.
+
+```
+kobopatcher device [--mount PATH] info [--config kobopatch.yaml]
+kobopatcher device [--mount PATH] install [KoboRoot.tgz] [--config kobopatch.yaml] [--yes]
+kobopatcher device [--mount PATH] settings [--list | --select | --enable ID | --disable ID | --set ID=VALUE | --undo] [--yes]
+kobopatcher device [--mount PATH] db [--list | --run ACTION] [--backup-dir DIR] [--yes]
+```
+
+| Command | What it does |
+|---|---|
+| `info` | Shows the model and firmware version. With `--config`, checks that a patch set matches the firmware. |
+| `install` | Copies `KoboRoot.tgz` (default `out/KoboRoot.tgz`) to `.kobo/` on the Kobo. With `--config`, refuses if the patch set is for another firmware version. Then eject the Kobo. |
+| `settings` | Switches settings in `.kobo/Kobo/Kobo eReader.conf` (see [Device settings](#device-settings-and-database-maintenance)): `--list`, `--select` (menu; **a** writes), `--enable ID`, `--disable ID`, `--set ID=VALUE` for settings that need a value, `--undo` to restore the last backup. A backup is made before every change. |
+| `db` | Database maintenance (see below): `--list`, `--run ACTION`. The database is copied to `--backup-dir` (default `./kobo-backup-TIMESTAMP`) first. |
+| `--yes` | Don't ask before changing something. |
 
 ### kobopatcher-apply
 
@@ -366,7 +426,7 @@ symlinks:
 | `overrides` | Patch file (spelled exactly as in `patches`) → patch name → `yes`/`no`. Overrides the `Enabled` state of those patches. A name that doesn't exist is an error. |
 | `lrelease` | Path to Qt's `lrelease`, used for `translations`. Default: found on the PATH (also as `lrelease-qt6`/`lrelease-qt5` and in the usual Qt install folders). |
 | `translations` | Qt translation source (`.ts`) → path of the compiled `.qm` inside `KoboRoot.tgz`, which must start with `usr/local/Kobo/translations/`. |
-| `files` | Local file → path (or list of paths) inside `KoboRoot.tgz` where it is installed. Paths must not start with `/`. Files are installed with mode 0777, owned by root. |
+| `files` | Local file → path (or list of paths) inside `KoboRoot.tgz` where it is installed. Paths must not start with `/`. Files are installed with mode 0777, owned by root. A path can also be written as `{dest: PATH, if: "PATCHFILE: patch name", mode: 0644}`: then the file is only added when that patch is on, with that mode. |
 | `symlinks` | Target → symlink path, both inside `KoboRoot.tgz`. The target must be one of the `files` destinations; the link points to `/<target>`. |
 
 Unknown keys and duplicate keys are errors, which catches typos.
@@ -482,15 +542,93 @@ kobopatcher -t -f kobopatch-testdata/4.38.23429.tar.xz
 - **Symlinks:** links listed in `symlinks` are added too; their targets must be
   files added with `files`.
 
-## The 4.38.23429 patch set in this repository
+## Choosing patches
 
-[`src/versions/4.38.23429`](src/versions/4.38.23429) contains patches for
-firmware 4.38.23429 on the Kobo Aura H2O (N250). They switch off work this
-device can't use: they restore lazy binding in 22 libraries, remove a sketch
-overlay timer and a forced full refresh on page turns, skip a Kobo Plus promo
-check, and stop 8 unused plugins from loading. **All of them are disabled by
-default and untested on a device.** See its [README](src/versions/4.38.23429/README.md)
-for what each patch does and the recommended order for trying them.
+Every patch of a set is one entry, shown in its category (patch files can set
+it with a `Category` line). A patch that changes several files, like lazy
+binding for 22 libraries, is still one entry. Patches in the same `PatchGroup`
+are alternatives: only one of them can be on.
+
+`kobopatcher --select` keys:
+
+| Key | |
+|---|---|
+| Up/Down, j/k, PgUp/PgDn, Home/End | Move |
+| Space | Switch the patch on/off (on a category: collapse it) |
+| Enter or c | Collapse/expand a category; C: all |
+| a / n | All / none of the current category |
+| / | Filter by text (Esc clears) |
+| e | Edit a value (device settings) |
+| r | Back to the defaults |
+| s / p | Save / save and patch |
+| q | Quit (asks if something changed) |
+| ? | Help |
+
+Without a terminal (or with `KOBOPATCHER_NO_TUI=1`) the menu is a numbered
+list: type numbers or ranges (`3 5-7`) to switch, `d N` for details, `s` to
+save, `q` to quit.
+
+The choice is saved as `overrides:` in `kobopatch.yaml`, only for patches that
+differ from their default; `--enable`, `--disable` and `--only` do the same from
+the command line (with `--save` to keep it).
+
+## Device settings and database maintenance
+
+Some improvements aren't patches but settings or database work on the Kobo.
+Connect the Kobo, tap **Connect**, then:
+
+```bash
+kobopatcher device info
+kobopatcher device settings --select
+kobopatcher device db --list
+```
+
+Settings (in `Kobo eReader.conf`; switching one off removes it again):
+
+| Id | What it does |
+|---|---|
+| `quiet-ui-logging` | UI log messages at warning instead of debug level (less work on every tap). |
+| `no-reading-stats` | Stops collecting reading statistics, which pile up on a device that never syncs. |
+| `no-periodic-sync` | No automatic daily sync and its wake-ups (keep it off if you sync with Calibre-Web automatically). |
+| `no-reagl` | Normal page-turn waveform instead of REAGL; try it as an A/B test. |
+| `no-forced-gc16` | Fewer full refreshes on pages with images (more ghosting). |
+| `cover-sleep-screen` | The book cover full-screen while asleep (also needed for custom sleep images). |
+| `ignore-captive-portal` | Use Wi-Fi networks without internet access. |
+| `calibre-web-store` | Use a Calibre-Web server as store and sync: `--set calibre-web-store=https://SERVER/kobo/TOKEN`. |
+
+Database actions (each copies the database first):
+
+| Action | What it does |
+|---|---|
+| `analytics-cleanup` | Deletes the optional analytics events, then compacts and checks the database. |
+| `compact` | Rebuilds `KoboReader.sqlite` with 4 KB pages and checks it. |
+| `date-shift` | Moves reading dates stuck in 2012 (after the clock reset) to now, keeping their order. Set the clock first. |
+| `secure-db-rebuild` | Moves the broken secure database (`BookReader.sqlite`) off the Kobo, which then creates a new one. Needed before Calibre-Web sync works. Loses Kobo-store tokens. You have to type `rebuild` to confirm. |
+
+Eject the Kobo afterwards. Settings take effect when it restarts.
+
+## Patch sets in this repository
+
+The community patch sets stop at firmware 4.38.21908. kobopatcher carries sets
+for later firmware of the Kobo Aura H2O (N250):
+
+| Folder | Firmware |
+|---|---|
+| [`src/versions/4.38.23429`](src/versions/4.38.23429) | 4.38.23429 |
+| [`src/versions/4.38.23852`](src/versions/4.38.23852) | 4.38.23852 (the newest for the Aura H2O) |
+
+Each contains:
+- a selection of the community patches of kobopatch-patches 4.38.21908, adapted
+  to the version (by category; some are on by default);
+- new patches from an analysis of this device (lazy binding, function stubs,
+  plugin tombstones, input methods, a pruned stylesheet, boot-script tweaks).
+  They are marked **NEW/experimental**, off by default and **not yet run on a
+  device**.
+
+Every patch applies to its firmware (checked with `kobopatcher -t`). See each
+folder's README for the recommended order of trying the experimental ones,
+and what was left out. The sets are generated by `tools/make_patchset.py`; a
+new firmware version is added there.
 
 ## FAQ
 

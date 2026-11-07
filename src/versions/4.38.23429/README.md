@@ -1,77 +1,66 @@
-# Patch set for firmware 4.38.23429 (Kobo Aura H2O, N250)
+# Patches for Kobo firmware 4.38.23429 (Kobo Aura H2O, N250)
 
-> **All patches are UNTESTED on the device and disabled by default.** Undo by
-> installing the stock `KoboRoot.tgz` of 4.38.23429.
+Use this folder with [kobopatcher](../../../README.md): put
+`kobo-update-4.38.23429.zip` here (or pass it with `-f`), choose patches, run
+`kobopatcher`, and copy `out/KoboRoot.tgz` to the Kobo. The main README has
+[the step-by-step guide](../../../README.md#patching-your-kobo-step-by-step),
+including [installing it on the device](../../../README.md#installing-the-patched-firmware-on-the-device)
+and [undoing it](../../../README.md#undoing-patches).
 
-These patches switch off work that this device cannot use. They are the
-patches from §4.1–§4.3 of `docs/kobopatch-extensions.md` in
-[kebasaa/kobo_aura_h2o](https://github.com/kebasaa/kobo_aura_h2o), written
-with kobopatcher's structure-aware instructions (`ElfLazyBinding`,
-`StubFunction`, `NopCall`, `Tombstone`), so the original kobopatch cannot apply them.
-
-| File | Patch | What it does |
-|---|---|---|
-| `src/libnickel.yaml`, `src/lazy/*.yaml` (22 libraries) | `Lazy binding like firmware 4.7` | Clears `DF_1_NOW`, removes `DT_BIND_NOW` and turns `PT_GNU_RELRO` into `PT_NULL`. Imports are then bound on first use, not all at process start (24,442 in libnickel). |
-| `src/libnickel.yaml` | `Disable sketch overlay timer on page turn` | NOPs the `SketchNote::disableWithTimer(int)` calls in `ReadingView::nextPage/prevPage` |
-| `src/libnickel.yaml` | `Disable forced full refresh on PDF page turn` | NOPs the `QWidget::setAttribute` calls in `ReadingView::nextPage/prevPage` (optional: more ghosting) |
-| `src/libnickel.yaml` | `Disable Kobo Plus promo check on Home` | `HomePageController::maybeShowKoboPlusPromo` returns immediately |
-| `src/tombstone/*.yaml` (8 plugins) | `Do not load this plugin` | Replaces boggle, rushhour, solitaire, sudoku, scribble, wikipedia, pdb and sandbox with 0-byte files, so nickel doesn't `dlopen` them. Their Beta Features entries stop working. |
-
-**Lazy binding differs from the doc's raw §4.1 patch.** Every one of the
-22 libraries also has a legacy `DT_BIND_NOW` dynamic entry. glibc treats that
-entry as eager binding on its own, independently of `DF_1_NOW`. Clearing
-`DF_1_NOW` alone therefore changes nothing. Dropping RELRO as well gives up the
-hardening and still gains nothing. `ElfLazyBinding` also removes `DT_BIND_NOW`.
-`--check-elf` rejects the raw two-field patch for this reason.
-
-`ElfLazyBinding` refuses a library in these cases:
-- it is not eagerly bound;
-- its `R_ARM_JUMP_SLOT` GOT slots don't all point to the PLT header (checked:
-  they do in all 22);
-- `PT_GNU_RELRO` is not inside a writable `PT_LOAD`.
-
-## Usage
-
-```sh
-cd src/versions/4.38.23429
-kobopatcher --check-elf -f /path/to/kobo-update-4.38.23429.zip
+```bash
+kobopatcher --select     # choose in a menu (Space switches, s saves, p saves and patches)
+kobopatcher --list       # or list them...
+kobopatcher --enable custom-font-sizes --disable unify-font-sizes --save   # ...and choose by id
+kobopatcher              # build out/KoboRoot.tgz
 ```
 
-The output goes to `out/KoboRoot.tgz`, with a verbose log in `out/log.txt`.
-To install it on the device (and to undo it), follow
-[Installing the patched firmware on the device](../../../README.md#installing-the-patched-firmware-on-the-device)
-in the main README.
-Enable patches with `Enabled: yes` in the `src/` files, or without editing them
-via `overrides:` in `kobopatch.yaml`:
+## What's in it
 
-```yaml
-overrides:
-  src/libnickel.yaml:
-    Disable Kobo Plus promo check on Home: yes
-```
+- **Community patches** (categories without "(experimental)"): a selection from
+  kobopatch-patches 4.38.21908, adapted to 4.38.23429. Some are switched on by default;
+  `--list` shows which. Every one of them applies to 4.38.23429 (checked with
+  `kobopatcher -t` against the firmware); none was tried on a device for this
+  version. A few are made for other models and say so in their description.
+- **New patches** (the "(experimental)" categories, all off): built from the
+  analysis of this device in [kobo_aura_h2o](https://github.com/kebasaa/kobo_aura_h2o)
+  (docs `kobopatch-extensions.md`, `firmware-performance-and-bugs.md`). They
+  apply to 4.38.23429 but **have not been run on a device**. Switch them on one at a
+  time, in this order, and check the device after each:
+  1. Performance: "Disable Kobo Plus promo check on Home", "Disable sketch
+     overlay timer on page turn", "Start the Wi-Fi DHCP client without debug
+     output". Check page turns, highlighting and Home.
+  2. Plugins: the "Don't load …" entries (games, Sketch Pad, Wikipedia, .pdb).
+  3. Performance: "Don't load the Japanese and Chinese input methods", then "Use
+     a stylesheet pruned for the Aura H2O" (check every screen).
+  4. Performance: "Lazy binding like firmware 4.7" (use `--check-elf`).
+  5. Boot: one entry at a time, starting with "Fix the boot animation busy
+     loop" and "Set the clock before nickel starts".
+  6. Performance: "Fewer sickel calls during database queries" (not for the
+     first start after a firmware update).
 
-## Device test ladder
+  Measure before and after (boot time, first PDF open, nickel's `VmRSS`), see
+  `firmware-performance-and-bugs.md` §9.
+- **Device settings and database maintenance** for the same device are not in
+  this folder; use `kobopatcher device settings` and `kobopatcher device db`
+  with the Kobo connected (see the main README).
 
-Measure after each step (boot time, first PDF open, `VmRSS` of nickel; see §6
-of the doc):
+## Not included
 
-1. The three `libnickel.yaml` stubs. Check that page turns, highlights and Home
-   still work.
-2. Plugin tombstones. Check with `grep -c /usr/local/Kobo/lib /proc/$(pidof nickel)/maps`.
-3. Lazy binding for `libnickel` and `librmsdk`.
-4. Lazy binding for QtCore, QtGui, QtWidgets and QtWebKit.
-5. Lazy binding for the rest.
+These items of the analysis have no exact bytes or script text yet, so they
+aren't patches here (future work): e-ink refresh tweaks in libkobo.so, sickel's
+watchdog thresholds and ping interval, a WAL-aware boot database check, the
+SIGHUP handler, clamping `numPartialUpdatePageTurns`, `pickel
+should-factory-reset`, nickel's RPATH, pruning the per-view stylesheets, a home
+wallpaper stylesheet, restoring the boot animation images, caching
+`kobo_config.sh`, the rcS fixes B6–B8 and udev fixes B11–B14, and SSH hardening.
 
-## Verified offline (2026-11-07)
+The analysis also rejects some ideas on purpose (relocation neutering, skipping
+static initialisers, removing `NEEDED` libraries, Qt modules, Adobe or DRM code,
+the two-field lazy-binding patch, `oom_score_adj` patches, a REAGL binary patch,
+stubs for features that are already off); they are deliberately not here.
 
-These checks ran with every patch enabled against
-`kobo-update-4.38.23429.zip`. The output was re-read with `readelf`:
-- all 22 libraries have `FLAGS_1: None`, no `BIND_NOW` and no `GNU_RELRO`;
-  the former RELRO phdr shows as `NULL`;
-- the libnickel stub reads `70 47 00 BF` @ `0xd5f2c0`;
-- the NOPs read `00 BF 00 BF` @ `0xf5bb28`, `0xf5bae4`, `0xf5bb3a`, `0xf5baf6`;
-- the 8 plugins are 0-byte files with their original mode and owner;
-- readelf printed no warnings, and `--check-elf` passed for all 30 files.
+## Generated
 
-The unit tests in `patchlib/elf_test.go` assert the doc's offsets and bytes
-against the same binaries (set `KOBOPATCH_TEST_ROOTFS` to the extracted rootfs).
+This folder is generated by `tools/make_patchset.py`; regenerate it instead of
+editing the files by hand. The few firmware-specific offsets are listed there.
+See [NOTICE.md](NOTICE.md) for the origin and license of the community patches.

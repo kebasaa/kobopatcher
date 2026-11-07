@@ -77,7 +77,9 @@ Flow style (`{Key: value, ...}`) and block style are equivalent:
 |---|---|---|
 | `Enabled` | `yes`/`no` (also `true`/`false`, `on`/`off`) | Whether the patch is applied. Default: no. If given several times, the last one counts. `overrides` in `kobopatch.yaml` replaces it. |
 | `Description` | text | Shown to users reading the file. At most one. Use `|` for several lines. |
-| `PatchGroup` | text | At most one enabled patch per group (per patch file). A patch can be in several groups. |
+| `PatchGroup` | text | At most one enabled patch per group (per patch file). A patch can be in several groups. In the menu, group members behave like radio buttons. |
+| `Category` | text | kobopatcher extension: the menu category (`kobopatcher --list`, `--select`). Patches without one are listed under "Other". |
+| `Experimental` | `yes`/`no` | kobopatcher extension: marks a new patch that hasn't been run on a device; the menu shows it as NEW/EXPERIMENTAL with a warning. |
 
 ## Finding the place to patch
 
@@ -193,6 +195,21 @@ Replaces one byte (0–255) at base + `Offset`.
 ```
 
 Replaces an 8-byte little-endian IEEE double at base + `Offset`.
+
+### ReplaceText
+
+```yaml
+  - ReplaceText: {Find: "umount -a -r\n", Replace: "touch /etc/.onboard_clean 2>/dev/null\numount -a -r\n"}
+  - ReplaceText: {Find: "echo a", Replace: "echo b", Count: 2}
+```
+
+kobopatcher extension for text files such as the boot scripts in
+`etc/init.d/`. Replaces the text; unlike `ReplaceString`, the replacement may be
+longer or shorter, so the file changes size. `Find` must occur exactly once (or
+exactly `Count` times), so a script that changed between firmware versions is
+refused instead of being edited in the wrong place. Refused on ELF files.
+Several patches can edit the same script as long as their `Find` texts stay
+unique.
 
 ## Compressed CSS (zlib)
 
