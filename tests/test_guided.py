@@ -298,3 +298,34 @@ def test_restore_from_the_guided_menu_lists_extra_files(world, monkeypatch, caps
 def test_restore_refuses_another_version(world, capsys):
     assert cli.main(["restore"] + _args(world, "--yes", "--target", V2)) == 1
     assert "a reset installs the stock files of the version it runs" in capsys.readouterr().err
+
+
+def test_github_release_fallback(monkeypatch):
+    """A 504 from a github.com release download is retried through GitHub's API."""
+    url = "https://github.com/o/r/releases/download/patchsets/index.json"
+    calls = []
+
+    class Resp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            self.close()
+
+    def fake_open(u, method="GET", accept=None):
+        calls.append((u, accept))
+        if u == url:
+            raise fetch.FetchError("504", 504)
+        if u == "https://api.github.com/repos/o/r/releases/tags/patchsets":
+            return Resp(b'{"assets": [{"name": "index.json", "url": "https://api.github.com/repos/o/r/releases/assets/7"}]}')
+        if u == "https://api.github.com/repos/o/r/releases/assets/7" and accept == "application/octet-stream":
+            return Resp(b"the file")
+        raise AssertionError(u)
+
+    monkeypatch.setattr(fetch, "_open", fake_open)
+    assert fetch.get_bytes(url) == b"the file"
+    assert len(calls) == 3
+    # a 404 is not retried, and other hosts aren't either
+    monkeypatch.setattr(fetch, "_open", lambda u, method="GET", accept=None: (_ for _ in ()).throw(fetch.FetchError("404", 404)))
+    with pytest.raises(fetch.FetchError, match="404"):
+        fetch.get_bytes(url)

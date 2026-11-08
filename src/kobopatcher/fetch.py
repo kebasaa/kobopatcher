@@ -35,23 +35,31 @@ UPGRADE_CHECK = "https://api.kobobooks.com/1.0/UpgradeCheck/Device/00000000-0000
 FIRMWARE_PAGE = "https://pgaskin.net/KoboStuff/kobofirmware.html"
 MARKER = ".kobopatcher-set.json"
 TIMEOUT = 60
+# github.com release downloads, and the API route to the same files
+_RELEASE_RX = re.compile(r"^https://github\.com/([^/]+)/([^/]+)/releases/download/([^/]+)/([^/?#]+)$")
+GITHUB_API = "https://api.github.com"
 
 
 class FetchError(KobopatcherError):
-    pass
+    def __init__(self, msg, status=None):
+        super().__init__(msg)
+        self.status = status
 
 
 # --- HTTP ------------------------------------------------------------------------------------------
 
 
-def _open(url, method="GET"):
-    req = urllib.request.Request(url, method=method, headers={"User-Agent": "kobopatcher/%s" % __version__})
+def _open(url, method="GET", accept=None):
+    headers = {"User-Agent": "kobopatcher/%s" % __version__}
+    if accept:
+        headers["Accept"] = accept
+    req = urllib.request.Request(url, method=method, headers=headers)
     try:
         return urllib.request.urlopen(req, timeout=TIMEOUT)
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            raise FetchError("%s: not found (404)" % url) from None
-        raise FetchError("%s: HTTP error %d %s" % (url, e.code, e.reason)) from None
+            raise FetchError("%s: not found (404)" % url, 404) from None
+        raise FetchError("%s: HTTP error %d %s" % (url, e.code, e.reason), e.code) from None
     except urllib.error.URLError as e:
         reason = e.reason
         if isinstance(reason, ssl.SSLCertVerificationError):
@@ -65,11 +73,39 @@ def _open(url, method="GET"):
 
 
 def get_bytes(url, limit=64 << 20):
-    with _open(url) as r:
+    """Download a (small) file. A github.com release download that fails with a
+    server error (github.com sometimes answers anonymous requests with 504) is
+    retried through GitHub's API, which serves the same file."""
+    try:
+        return _read(url, limit)
+    except FetchError as e:
+        m = _RELEASE_RX.match(url)
+        if not m or not (e.status == 429 or (e.status or 0) >= 500):
+            raise
+        try:
+            return _read(_release_asset_url(*m.groups()), limit, "application/octet-stream")
+        except FetchError:
+            raise e from None
+
+
+def _read(url, limit, accept=None):
+    with _open(url, accept=accept) as r:
         data = r.read(limit + 1)
     if len(data) > limit:
         raise FetchError("%s is larger than expected" % url)
     return data
+
+
+def _release_asset_url(owner, repo, tag, name):
+    api = "%s/repos/%s/%s/releases/tags/%s" % (GITHUB_API, owner, repo, tag)
+    try:
+        assets = json.loads(_read(api, 4 << 20, "application/vnd.github+json").decode("utf-8")).get("assets") or []
+    except ValueError:
+        raise FetchError("GitHub's API gave an unexpected answer for %s" % api) from None
+    for a in assets:
+        if a.get("name") == name and a.get("url"):
+            return a["url"]
+    raise FetchError("%s has no file %s" % (api, name), 404)
 
 
 def head_size(url):
