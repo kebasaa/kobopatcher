@@ -1,11 +1,13 @@
 # Patches for Kobo firmware 4.38.23429 (Kobo Aura H2O, N250)
 
-Use this folder with [kobopatcher](../../../README.md): put
-`kobo-update-4.38.23429.zip` here (or pass it with `-f`), choose patches, run
-`kobopatcher`, and copy `out/KoboRoot.tgz` to the Kobo. The main README has
-[the step-by-step guide](../../../README.md#patching-your-kobo-step-by-step),
-including [installing it on the device](../../../README.md#installing-the-patched-firmware-on-the-device)
-and [undoing it](../../../README.md#undoing-patches).
+You don't need to download this folder: connect a Kobo that runs 4.38.23429 and
+run `kobopatcher`, or run `kobopatcher --target 4.38.23429`. kobopatcher downloads
+this set and the firmware, lets you choose the patches in a menu and builds
+`KoboRoot.tgz`. See [the tutorial](../../../README.md#tutorial), and
+[resetting to stock firmware](../../../README.md#reset-to-stock-firmware) to undo it.
+
+To use the folder by hand, put `kobo-update-4.38.23429.zip` here (or pass it with
+`-f`) and run kobopatcher in it:
 
 ```bash
 kobopatcher --select     # choose in a menu (Space switches, s saves, p saves and patches)

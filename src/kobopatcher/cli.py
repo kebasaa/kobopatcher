@@ -18,8 +18,17 @@ HOMEPAGE = "https://github.com/kebasaa/kobopatcher"
 
 
 HELP = """Usage: kobopatcher [OPTIONS] [CONFIG_FILE]
+       kobopatcher [start] [GUIDED OPTIONS]   (guided mode, see kobopatcher start --help)
+       kobopatcher restore [OPTIONS]          (reset a Kobo to stock firmware)
+       kobopatcher device COMMAND             (settings and maintenance of a connected Kobo)
 
 Version: %s
+
+Without a kobopatch.yaml in the current folder, kobopatcher starts the guided
+mode: it finds the connected Kobo, downloads the patch set and the firmware,
+lets you choose patches in a menu, builds KoboRoot.tgz and copies it to the Kobo.
+
+Patching a patch-set folder (with a kobopatch.yaml):
 
 Options:
   -f, --firmware FILE   firmware file to be used, overriding `in` in the config
@@ -330,6 +339,8 @@ def main(argv=None) -> int:
         return 2
     except KeyboardInterrupt:
         return 130
+    finally:
+        patchfile.set_log(None)  # the log file is closed now
 
 
 def _main(argv=None) -> int:
@@ -338,6 +349,15 @@ def _main(argv=None) -> int:
         from . import device
 
         return device.main(argv[1:])
+    if argv and argv[0] in ("start", "restore"):
+        from . import guided
+
+        return guided.main(argv[0], argv[1:])
+    if not go_compat():
+        from . import guided
+
+        if guided.wants_guided(argv):
+            return guided.main("start", argv)
     ap = _build_parser()
     args = ap.parse_args(argv)
     if args.version:
@@ -390,6 +410,8 @@ def _main(argv=None) -> int:
         cfg = config.load(buf)
     except OSError as e:
         sys.stderr.write("Error: could not load config file: %s\n" % patchfile.os_err("open", conf, e))
+        if not go_compat() and not args.config:
+            sys.stderr.write("There is no kobopatch.yaml here. Run kobopatcher without options for the guided mode.\n")
         return 1
     except KobopatcherError as e:
         sys.stderr.write("Error: could not load config file%s: %s\n" % (" from stdin" if conf == "-" else "", e))

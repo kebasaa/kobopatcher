@@ -1,0 +1,16 @@
+# Kobo models by the last three digits of their device id (the last field of
+# .kobo/version). "family" is the folder of Kobo's firmware downloads
+# (https://ereaderfiles.kobo.com/firmwares/<family>/...). It is only listed where
+# it is confirmed; for the other models kobopatcher asks Kobo's update service.
+"310": {name: "Kobo Touch (A/B)"}
+"320": {name: "Kobo Touch (C)"}
+"330": {name: "Kobo Glo"}
+"340": {name: "Kobo Mini"}
+"350": {name: "Kobo Aura HD"}
+"360": {name: "Kobo Aura"}
+"370": {name: "Kobo Aura H2O", family: kobo5}
+"371": {name: "Kobo Glo HD"}
+"372": {name: "Kobo Touch 2.0"}
+"373": {name: "Kobo Aura ONE"}
+"374": {name: "Kobo Aura H2O Edition 2"}
+"375": {name: "Kobo Aura Edition 2"}
