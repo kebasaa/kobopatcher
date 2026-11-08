@@ -26,21 +26,20 @@ from .errors import KobopatcherError
 
 CONF = os.path.join(".kobo", "Kobo", "Kobo eReader.conf")
 
-# the last field of .kobo/version
-MODELS = {
-    "310": "Kobo Touch (A/B)",
-    "320": "Kobo Touch (C)",
-    "330": "Kobo Glo",
-    "340": "Kobo Mini",
-    "350": "Kobo Aura HD",
-    "360": "Kobo Aura",
-    "370": "Kobo Aura H2O",
-    "371": "Kobo Glo HD",
-    "372": "Kobo Touch 2.0",
-    "373": "Kobo Aura ONE",
-    "374": "Kobo Aura H2O Edition 2",
-    "375": "Kobo Aura Edition 2",
-}
+
+# the last field of .kobo/version -> {name, family}
+def load_models():
+    with open(os.path.join(os.path.dirname(__file__), "data", "models.yaml"), encoding="utf-8") as f:
+        return {str(k): v for k, v in (yaml.safe_load(f) or {}).items()}
+
+
+MODELS = {k: v["name"] for k, v in load_models().items()}
+
+
+EJECT = """Now eject the Kobo safely (Windows: "Safely Remove Hardware"; macOS: Eject in
+Finder; Linux: eject it in the file manager) and unplug the cable. The Kobo then
+installs the files: it restarts, unpacks them and restarts once more. This takes
+a minute or two; don't switch it off meanwhile."""
 
 
 class DeviceError(KobopatcherError):
@@ -129,7 +128,7 @@ def _stamp():
 def cmd_info(root, a):
     v = read_version(root)
     print("Kobo at %s" % root)
-    print("  Model:    %s (%s)" % (v["model"], v["model_code"]))
+    print("  Model:    %s (%s, model number %s)" % (v["model"], v["model_code"], v["model_id"]))
     print("  Firmware: %s" % v["firmware"])
     try:
         free = shutil.disk_usage(root).free
@@ -165,8 +164,9 @@ def cmd_install(root, a):
     tmp = dest + ".part"
     shutil.copyfile(src, tmp)
     os.replace(tmp, dest)
-    print("Copied. Now eject the Kobo safely and unplug it: it installs the update and restarts.")
-    print("To undo the patches later, install the KoboRoot.tgz from the original firmware zip the same way.")
+    print("Copied.")
+    print(EJECT)
+    print("To undo the patches later, run: kobopatcher restore")
     return 0
 
 
