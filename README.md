@@ -9,11 +9,15 @@ Patches change how the device behaves: for example the font sizes and line
 spacing on offer, what the home screen shows, how the reader handles margins,
 or which features load at all.
 
+kobopatcher comes with its own patch sets, in [`src/versions`](src/versions),
+for firmware newer than the last community patch sets (4.38.21908): currently
+4.38.23429 and 4.38.23852 (see [Patch sets in this repository](#patch-sets-in-this-repository)).
+
 kobopatcher is an independent Python reimplementation of
 [kobopatch](https://github.com/pgaskin/kobopatch) by Patrick Gaskin. It reads the
-same configuration files and patch files, so the patch sets published for
+same configuration files and patch files, so the older patch sets published for
 kobopatch (such as [kobopatch-patches](https://github.com/pgaskin/kobopatch-patches))
-work with it unchanged. It also adds instructions that understand the structure
+also work with it unchanged. It also adds instructions that understand the structure
 of the programs they patch (see [Structure-aware ELF instructions](#structure-aware-elf-instructions)).
 It runs in a terminal on Linux, macOS and Windows.
 
@@ -113,15 +117,32 @@ like `4.38.23429`. Write it down.
 ### 2. Get a patch set for that version
 
 A patch set is a folder with a `kobopatch.yaml` and a `src/` folder of patch
-files. Use one of these:
+files. kobopatcher comes with patch sets for these versions:
 
-- **The community patches:** download the zip for your version from the
+| Firmware | Patch set |
+|---|---|
+| 4.38.23429 | [`src/versions/4.38.23429`](src/versions/4.38.23429) |
+| 4.38.23852 | [`src/versions/4.38.23852`](src/versions/4.38.23852) |
+
+They are not installed with kobopatcher itself. Download this repository
+(on GitHub, **Code → Download ZIP**, then unzip it) or clone it:
+
+```bash
+git clone https://github.com/kebasaa/kobopatcher
+```
+
+and use the folder for your version, e.g. `kobopatcher/src/versions/4.38.23429`.
+The folder is self-contained: you can copy it anywhere. What's in the sets is
+described [below](#patch-sets-in-this-repository).
+
+Other sources:
+
+- **Older firmware (up to 4.38.21908):** the community patch sets. Download the
+  zip for your version from the
   [kobopatch-patches releases](https://github.com/pgaskin/kobopatch-patches/releases)
   and unzip it. It contains `kobopatch.yaml` and `src/`. (It also contains
-  scripts and binaries of the original kobopatch, which you don't need.)
-- **A set from this repository**: [`src/versions/4.38.23429`](src/versions/4.38.23429)
-  or [`src/versions/4.38.23852`](src/versions/4.38.23852), for firmware the
-  community sets don't cover (see [below](#patch-sets-in-this-repository)).
+  scripts and binaries of the original kobopatch, which you don't need.) Their
+  patches have no categories, so the menu lists them all under "Other".
 - **Your own**, written as described in [Patch files](#patch-files).
 
 If there is no patch set for your exact version, don't use one for a nearby
@@ -138,11 +159,12 @@ model are collected on
 Put the zip where `kobopatch.yaml` expects it. Look at its `in:` line:
 
 ```yaml
-in: src/kobo-update-4.38.23429.zip
+in: kobo-update-4.38.23429.zip
 ```
 
-means the zip goes into the `src/` folder of the patch set. (You can also leave
-it anywhere and pass it with `-f`, see step 5.)
+means the zip goes into the patch set's folder, next to `kobopatch.yaml`. (The
+community sets have `in: src/kobo-update-….zip`, meaning their `src/` folder.)
+You can also leave it anywhere and pass it with `-f`, see step 5.
 
 ### 4. Choose your patches
 
@@ -180,11 +202,10 @@ survives replacing the patch files with a newer copy:
 
 ```yaml
 overrides:
-  src/libnickel.so.1.0.0.yaml:
+  src/libnickel/reading-layout.yaml:
     My 10 line spacing values: yes
-    Custom font sizes: yes
-  src/nickel.yaml:
-    Remove beta features: yes
+  src/libnickel/menus.yaml:
+    Hide browser from beta features: yes
 ```
 
 The keys must be written exactly as in the `patches:` section, and the patch
@@ -609,8 +630,11 @@ Eject the Kobo afterwards. Settings take effect when it restarts.
 
 ## Patch sets in this repository
 
-The community patch sets stop at firmware 4.38.21908. kobopatcher carries sets
-for later firmware of the Kobo Aura H2O (N250):
+The community patch sets of kobopatch-patches stop at firmware 4.38.21908, so
+kobopatcher carries its own sets for later firmware. They were made with, and
+checked against, the firmware of the Kobo Aura H2O (N250); firmware for other
+models of the same version has not been tried. [Step 2](#2-get-a-patch-set-for-that-version)
+says how to download them.
 
 | Folder | Firmware |
 |---|---|
@@ -677,7 +701,14 @@ See [Translations, extra files and symlinks](#translations-extra-files-and-symli
 
 **My Kobo updated itself and the patches are gone.**
 A firmware update replaces the patched files. Patch the new version (when a patch
-set exists for it) and install the new `KoboRoot.tgz`.
+set exists for it, see [Patch sets in this repository](#patch-sets-in-this-repository))
+and install the new `KoboRoot.tgz`.
+
+**Is there a patch set for my firmware version?**
+The sets in [`src/versions`](src/versions) cover 4.38.23429 and 4.38.23852;
+[kobopatch-patches](https://github.com/pgaskin/kobopatch-patches/releases) covers
+older versions up to 4.38.21908. For anything else there is none yet: a set for a
+nearby version won't apply.
 
 **Does kobopatcher change anything on my computer or on the device?**
 On your computer it only writes the output and log files named in
