@@ -62,6 +62,18 @@ class RunError(KobopatcherError):
     pass
 
 
+# kobopatcher extension: a files: source "firmware:PATH" copies PATH from the
+# firmware's own KoboRoot.tgz (following its symlinks) instead of a local file
+FW_PREFIX = "firmware:"
+
+
+def fw_path(src):
+    p = src[len(FW_PREFIX):]
+    while p.startswith("./"):
+        p = p[2:]
+    return os.path.normpath(p.lstrip("/"))
+
+
 def wrap(err, fmt, *a):
     return RunError("%s: %s" % (fmt % a if a else fmt, err))
 
@@ -75,6 +87,7 @@ class KoboPatcher:
         self.sums = {}
         self.known = set()  # (patch file, patch name)
         self.enabled = set()  # the enabled ones, after overrides
+        self.fw_files = {}  # firmware path -> bytes, or ("link", target), for files: firmware: sources
 
     # user output
     @staticmethod
@@ -94,10 +107,50 @@ class KoboPatcher:
                 files.append(pf)
         return files
 
+    def _fw_dirs(self):
+        """Directories of the firmware files that files: entries copy (firmware:PATH)."""
+        if go_compat():
+            return set()
+        return {os.path.dirname(fw_path(src)) for src in (self.cfg.files or {}) if src.startswith(FW_PREFIX)}
+
+    def _capture(self, ent, dirs):
+        """Keep the firmware files (and symlinks) next to a firmware: source; later entries win.
+        Returns the bytes it read (a streamed entry can be read only once), else None."""
+        name = ent.name[2:] if ent.name.startswith("./") else ent.name
+        if os.path.dirname(name) not in dirs:
+            return None
+        if ent.info.issym():
+            self.fw_files[name] = ("link", ent.info.linkname)
+        elif ent.is_regular():
+            buf = self.fw_files[name] = ent.read()
+            return buf
+        return None
+
+    def _firmware_file(self, src):
+        """The bytes of firmware:PATH, following symlinks inside the firmware."""
+        path, seen = fw_path(src), set()
+        while True:
+            if path in seen or len(seen) > 16:
+                raise RunError("could not add file: %s: symlink loop in the firmware" % src)
+            seen.add(path)
+            v = self.fw_files.get(path)
+            if v is None:
+                raise RunError("could not add file: %s: no such file in the firmware's KoboRoot.tgz "
+                               "(a testdata tarball only has the patched binaries)" % src)
+            if isinstance(v, tuple):
+                t = v[1]
+                path = os.path.normpath(t.lstrip("/") if t.startswith("/") else os.path.join(os.path.dirname(path), t))
+                continue
+            if not v:
+                raise RunError("could not add file: %s: the file is empty in the firmware" % src)
+            return v
+
     def apply_patches(self):
         self.d("\n\nKoboPatch::ApplyPatches")
         matched = set()
+        dirs = self._fw_dirs()
         for ent in self._entries():
+            captured = self._capture(ent, dirs) if dirs else None
             name = ent.name
             pfs = self._targets(name)
             if not pfs:
@@ -113,7 +166,7 @@ class KoboPatcher:
             self.l("\nPatching %s" % name)
             if not ent.is_regular():
                 raise RunError("could not patch file '%s': not a regular file" % name)
-            buf = ent.read()
+            buf = captured if captured is not None else ent.read()
             orig = bytes(buf) if self.check_elf else None
             pt = Patcher(buf)
             pt.set_path(name)
@@ -197,6 +250,11 @@ class KoboPatcher:
                 self.l("  ADD  %-35s  TO  %s" % (src, dest))
                 if dest.startswith("/"):
                     raise RunError("could not add file: destination must not start with a slash")
+                if src.startswith(FW_PREFIX) and not go_compat():
+                    buf = self._firmware_file(src)
+                    self.out.add_file("./" + dest, buf, fd.mode)
+                    self.out.expected_size += len(buf)
+                    continue
                 try:
                     with open(src, "rb") as f:
                         buf = f.read()

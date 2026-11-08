@@ -217,3 +217,46 @@ def test_symdump_and_cssextract(tmp_path, testdata, monkeypatch):
     assert cssextract.main(["nickel"]) == 0
     css = (tmp_path / "cssextract.out.css").read_text(encoding="utf-8")
     assert "offset_int32(4563746)" in css and "#boggleContainer[qApp_deviceIsPika=true]" in css
+
+
+def _fw_with_images(tmp_path, testdata):
+    """A firmware zip whose etc/images has an empty placeholder (overwritten by a later entry) and a symlink."""
+    bio = io.BytesIO()
+    with tarfile.open(fileobj=bio, mode="w", format=tarfile.GNU_FORMAT) as tf:
+        def add(name, data=None, link=None):
+            ti = tarfile.TarInfo(name)
+            if link is not None:
+                ti.type, ti.linkname = tarfile.SYMTYPE, link
+                tf.addfile(ti)
+            else:
+                ti.size, ti.mode = len(data), 0o644
+                tf.addfile(ti, io.BytesIO(data))
+        add("./usr/local/Kobo/libnickel.so.1.0.0", testdata("libnickel.so.1.0.0"))
+        add("./usr/local/Kobo/libboggle.so", b"\x7fELF fake")
+        add("./etc/images/dragon-on-0.raw.gz", b"")
+        add("./etc/images/snow-on-0.raw.gz", link="dragon-on-0.raw.gz")
+        add("./etc/images/empty.raw.gz", b"")
+        add("./etc/images/dragon-on-0.raw.gz", b"IMAGE")  # the later entry counts
+    z = tmp_path / "kobo-update-1.2.3.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.writestr("KoboRoot.tgz", gzip.compress(bio.getvalue()))
+    return z
+
+
+def test_files_from_firmware(tmp_path, testdata):
+    fwz = _fw_with_images(tmp_path, testdata)
+    d = _setup(tmp_path, fwz, "files:\n  firmware:etc/images/snow-on-0.raw.gz:\n    dest: etc/images/dahlia-on-0.raw.gz\n    mode: 0644\n")
+    assert cli.main([str(d / "kobopatch.yaml")]) == 0
+    ti, data = _members(d / "out" / "KoboRoot.tgz")["./etc/images/dahlia-on-0.raw.gz"]
+    assert data == b"IMAGE" and ti.mode == 0o644  # through the symlink, last entry wins
+
+
+@pytest.mark.parametrize("src,err", [
+    ("firmware:etc/images/missing.raw.gz", "no such file in the firmware"),
+    ("firmware:etc/images/empty.raw.gz", "the file is empty in the firmware"),
+])
+def test_files_from_firmware_errors(tmp_path, testdata, capsys, src, err):
+    fwz = _fw_with_images(tmp_path, testdata)
+    d = _setup(tmp_path, fwz, "files:\n  %s: etc/images/x.raw.gz\n" % src)
+    assert cli.main([str(d / "kobopatch.yaml")]) == 1
+    assert err in capsys.readouterr().err

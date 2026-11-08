@@ -1,0 +1,71 @@
+# Exact patches for libnickel.so.1.0.0, valid for both 4.38.23429 and 4.38.23852
+# (same Sym+Rel and the same bytes in both builds; see firmware-performance-and-bugs.md §7.9). All off by default.
+
+Integrity check when a WAL file exists (B1):
+  - Enabled: no
+  - PatchGroup: DB integrity check (B1)
+  - Category: "Bug fixes (experimental)"
+  - Experimental: yes
+  - NotRecommended: "the database check would then run at every start and after every USB session (an estimated 10-30 s each with a large library). Check the database on a computer instead (firmware-performance-and-bugs.md section 4.4)."
+  - Description: |
+      DatabaseAdapter::getIntegrityCheckResult(force=false) only runs "pragma integrity_check(1)" when
+      <db>.sqlite-journal exists, which never happens in WAL mode. This makes it test <db>.sqlite-wal
+      instead: the format string becomes "%1.sqlite-wal" and the length passed to
+      QString::fromLatin1_helper goes from 17 to 13. While nickel has the WAL database open the -wal
+      file practically always exists, so the check then runs on every CheckDatabaseCommand.
+      Cost: a full read of KoboReader.sqlite (an estimated 10-30 s for 70 MB on this device).
+  - BaseAddress: {Sym: _ZN15DatabaseAdapter23getIntegrityCheckResultEbRK7QString, Rel: 0x8}
+  - ReplaceBytes: {FindH: 88 46 11 21 F8 60, ReplaceH: 88 46 0D 21 F8 60}   # mov r8,r1; movs r1,#17 -> #13; str r0,[r7,#12]
+  - FindReplaceString: {Find: "%1.sqlite-journal", Replace: "%1.sqlite-wal"}
+
+Always run the integrity check (B1, branch variant):
+  - Enabled: no
+  - PatchGroup: DB integrity check (B1)
+  - Category: "Bug fixes (experimental)"
+  - Experimental: yes
+  - NotRecommended: "the database check would then run at every start and after every USB session (an estimated 10-30 s each with a large library). Check the database on a computer instead (firmware-performance-and-bugs.md section 4.4)."
+  - Description: |
+      Same effect as the WAL variant, with one 4-byte change: the "if (!force) check -journal exists"
+      branch becomes a NOP, so every call behaves as if force=true. Same cost caveat.
+  - BaseAddress: {Sym: _ZN15DatabaseAdapter23getIntegrityCheckResultEbRK7QString, Rel: 0x70}
+  - ReplaceBytes: {FindH: B8 F1 00 0F 00 F0 49 83, ReplaceH: B8 F1 00 0F 00 BF 00 BF}   # beq.w -> nop; nop
+
+Clamp numPartialUpdatePageTurns 0 to 1 (B3):
+  - Enabled: no
+  - Category: "Bug fixes (experimental)"
+  - Experimental: yes
+  - Description: |
+      ReadingView::eventFilter computes pageCount % numPartialUpdatePageTurns with __aeabi_uidivmod;
+      [Reading] numPartialUpdatePageTurns=0 divides by zero (libgcc raises SIGFPE, so nickel crashes).
+      This rewrites "blx __aeabi_uidivmod; cmp r1,#0; beq full" as "cbz r1,full; blx __aeabi_uidivmod;
+      cbz r1,full": a divisor of 0 now behaves exactly like 1 (full refresh on every page). Other values
+      are unchanged. No code cave.
+  - BaseAddress: {Sym: _ZN11ReadingView11eventFilterEP7QObjectP6QEvent, Rel: 0x1e4}
+  - ReplaceBytes: {Offset: 0x0, FindH: D4 F8 EC 00 00 28 04 DB F9 6A, CheckOnly: true}   # ldr.w r0,[r4,#236]; cmp r0,#0; blt; ldr r1,[r7,#44]
+  - ReplaceBytes: {Offset: 0xa, FindInstBLX: {SymPLT: __aeabi_uidivmod}, ReplaceH: E9 B3 00 BF}   # cbz r1,+0x7a ; placeholder
+  - ReplaceBytes: {Offset: 0xe, FindH: 00 29 3A D0, ReplaceH: 00 BF D1 B3}                          # placeholder ; cbz r1,+0x74
+  - ReplaceBytes: {Offset: 0xc, FindH: 00 BF 00 BF, ReplaceInstBLX: {SymPLT: __aeabi_uidivmod}}      # blx moved down by 2
+
+Sickel ping every 9 s instead of 5 s:
+  - Enabled: no
+  - PatchGroup: Sickel ping interval
+  - Category: "Performance (experimental)"
+  - Experimental: yes
+  - Description: |
+      PowerManager::PowerManager() starts the sickel keep-alive timer with QTimer::start(5000). 9000 ms
+      stays below sickel's 10 s watchdog tick, so sickel needs no change: about 44 % fewer
+      nickel -> dbus-daemon -> sickel wake-ups while the device is awake.
+  - BaseAddress: {Sym: _ZN12PowerManagerC2Ev, Rel: 0x1e4}
+  - ReplaceBytes: {FindH: 41 F2 88 31 04 46, ReplaceH: 42 F2 28 31 04 46}   # movw r1,#5000 -> movw r1,#9000
+
+Sickel ping every 10 s instead of 5 s:
+  - Enabled: no
+  - PatchGroup: Sickel ping interval
+  - Category: "Performance (experimental)"
+  - Experimental: yes
+  - Description: |
+      As above with 10000 ms. This equals sickel's own 10 s tick, so its miss counter will often reach 1
+      before each ping resets it (harmless, but sickel then wakes as often as before). Raise sickel's
+      Ping/Resume QTimer::start(10000) together with this patch to get the full saving.
+  - BaseAddress: {Sym: _ZN12PowerManagerC2Ev, Rel: 0x1e4}
+  - ReplaceBytes: {FindH: 41 F2 88 31 04 46, ReplaceH: 42 F2 10 71 04 46}   # movw r1,#5000 -> movw r1,#10000

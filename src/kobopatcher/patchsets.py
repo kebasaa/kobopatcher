@@ -94,7 +94,16 @@ def set_entry(set_dir, data=None, commit=""):
         "release": str(src.get("release", "")),
         "firmware": {str(k): dict(v or {}) for k, v in (src.get("firmware") or {}).items()},
         "checked_models": [str(m) for m in src.get("checked_models") or []],
+        "requires": str(src.get("requires", "")),  # the oldest kobopatcher that reads the set
     }
+
+
+def check_requires(entry, have):
+    """Refuse a set that needs a newer kobopatcher than `have`."""
+    need = str(entry.get("requires") or "")
+    if need and version_key(need) > version_key(have):
+        raise PatchSetError("the patch set for %s needs kobopatcher %s or newer (this is %s); update kobopatcher "
+                            "(pipx upgrade kobopatcher) and try again" % (entry.get("version", "?"), need, have))
 
 
 def set_dirs(versions_dir):

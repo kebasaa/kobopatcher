@@ -5,3 +5,5 @@ release: Aug2025
 firmware:
   kobo5: {sha256: d0eed76da1146367bc059bf4a90227d217d246204f729d25cc6455c6e0fdb684}
 checked_models: ["370"]
+# the oldest kobopatcher that reads this set (NotRecommended, firmware: files)
+requires: "0.2.0"

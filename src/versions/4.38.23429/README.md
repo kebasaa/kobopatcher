@@ -25,41 +25,52 @@ kobopatcher              # build out/KoboRoot.tgz
   version. A few are made for other models and say so in their description.
 - **New patches** (the "(experimental)" categories, all off): built from the
   analysis of this device in [kobo_aura_h2o](https://github.com/kebasaa/kobo_aura_h2o)
-  (docs `kobopatch-extensions.md`, `firmware-performance-and-bugs.md`). They
-  apply to 4.38.23429 but **have not been run on a device**. Switch them on one at a
-  time, in this order, and check the device after each:
+  (docs `kobopatch-extensions.md`, `firmware-performance-and-bugs.md` §7.9,
+  `app-development.md` §5.3). They apply to 4.38.23429 but **have not been run on a
+  device**. Switch them on one at a time, in this order, and check the device
+  after each:
   1. Performance: "Disable Kobo Plus promo check on Home", "Disable sketch
      overlay timer on page turn", "Start the Wi-Fi DHCP client without debug
      output". Check page turns, highlighting and Home.
   2. Plugins: the "Don't load …" entries (games, Sketch Pad, Wikipedia, .pdb).
   3. Performance: "Don't load the Japanese and Chinese input methods", then "Use
-     a stylesheet pruned for the Aura H2O" (check every screen).
-  4. Performance: "Lazy binding like firmware 4.7" (use `--check-elf`).
-  5. Boot: one entry at a time, starting with "Fix the boot animation busy
-     loop" and "Set the clock before nickel starts".
-  6. Performance: "Fewer sickel calls during database queries" (not for the
-     first start after a firmware update).
+     a stylesheet pruned for the Aura H2O" (or its variant with a home-screen
+     wallpaper), then "Prune other models from the … per-view stylesheets"
+     (check every screen).
+  4. E-ink: "full refresh only above 95% of the screen" and "retry a failed
+     screen update after 20 ms".
+  5. Performance: "Lazy binding like firmware 4.7" (use `--check-elf`).
+  6. Boot: one entry at a time, starting with "Fix the boot animation busy
+     loop" and "Set the clock before nickel starts"; then the rcS, rcK, udev and
+     NTP fixes, and "Add the Aura H2O boot, update and reset images" (check the
+     device first, as its description says).
+  7. Watchdog and Performance: "Watchdog - allow 140 s instead of 70 s", "Sickel
+     ping every 9 s", then "Fewer sickel calls during database queries" (not for
+     the first start after a firmware update).
+  8. SSH: "Let sshd accept connections on kernel 2.6.35" together with "Harden
+     SSH"; without the first, no SSH login works on this kernel.
 
   Measure before and after (boot time, first PDF open, nickel's `VmRSS`), see
   `firmware-performance-and-bugs.md` §9.
+- **NOT RECOMMENDED** entries (shown in red): they work, but the analysis
+  advises leaving them off, and their description says why. "All on" and
+  `--enable '*'` leave them off; name one to switch it on. They are: the two
+  database integrity check variants (B1: a check at every start, an estimated
+  10–30 s), the two "wait for completion" e-ink variants and "use GL16
+  wherever GC16 is requested", the nickel RPATH change (no gain), and the three
+  factory-reset counter entries (they switch off Kobo's boot-loop recovery).
 - **Device settings and database maintenance** for the same device are not in
   this folder; use `kobopatcher device settings` and `kobopatcher device db`
   with the Kobo connected (see the main README).
 
 ## Not included
 
-These items of the analysis have no exact bytes or script text yet, so they
-aren't patches here (future work): e-ink refresh tweaks in libkobo.so, sickel's
-watchdog thresholds and ping interval, a WAL-aware boot database check, the
-SIGHUP handler, clamping `numPartialUpdatePageTurns`, `pickel
-should-factory-reset`, nickel's RPATH, pruning the per-view stylesheets, a home
-wallpaper stylesheet, restoring the boot animation images, caching
-`kobo_config.sh`, the rcS fixes B6–B8 and udev fixes B11–B14, and SSH hardening.
-
-The analysis also rejects some ideas on purpose (relocation neutering, skipping
-static initialisers, removing `NEEDED` libraries, Qt modules, Adobe or DRM code,
-the two-field lazy-binding patch, `oom_score_adj` patches, a REAGL binary patch,
-stubs for features that are already off); they are deliberately not here.
+The analysis decided against some ideas on purpose; they are deliberately not
+here: relocation neutering, skipping static initialisers, removing `NEEDED`
+libraries, Qt modules, Adobe or DRM code, the two-field lazy-binding patch,
+`oom_score_adj` patches, a REAGL binary patch, stubs for features that are
+already off, a SIGHUP handler change (nickel already treats SIGHUP as "low
+memory"), and caching `kobo_config.sh` (about 0.1 s per boot).
 
 ## Generated
 

@@ -226,6 +226,13 @@ class Experimental(_Scalar):
     name, modifies = "Experimental", False
 
 
+class NotRecommended(_Scalar):
+    """kobopatcher extension: the patch works, but its author advises against
+    switching it on; the value says why."""
+
+    name, modifies = "NotRecommended", False
+
+
 class BaseAddress(_Scalar):
     name = "BaseAddress"
 
@@ -748,6 +755,7 @@ for _cls, _t in [
     (PatchGroup, Y.String("kobopatch.PatchGroup")),
     (Category, Y.String("kobopatch.Category")),
     (Experimental, Y.Bool("kobopatch.Experimental")),
+    (NotRecommended, Y.String("kobopatch.NotRecommended")),
     (BaseAddress, Y.Custom("kobopatch.BaseAddress", _flex_unmarshal)),
     (FindBaseAddressHex, Y.String("kobopatch.FindBaseAddressHex")),
     (FindBaseAddressString, Y.String("kobopatch.FindBaseAddressString")),
@@ -812,6 +820,7 @@ class ParsedPatch:
         self.patch_groups = []
         self.category = ""
         self.experimental = False
+        self.not_recommended = ""  # the reason, if the author advises against it
         self.instructions = []
 
 
@@ -1017,6 +1026,10 @@ def parse(buf: bytes) -> PatchSet:
                 p.category = value
             elif cls is Experimental:
                 p.experimental = bool(value)
+            elif cls is NotRecommended:
+                if not str(value).strip():
+                    raise KobopatchError("patch %s: line %d: instruction %d: NotRecommended needs a reason" % (quote(name), ln, i + 1))
+                p.not_recommended = str(value).strip()
             else:
                 inst = value if isinstance(value, Instruction) else cls(value)
                 p.instructions.append(ParsedInstruction(i + 1, ln, inst))

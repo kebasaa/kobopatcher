@@ -1,0 +1,32 @@
+# Exact boot-script and system fix (firmware-performance-and-bugs.md §7.9); same for 4.38.23429 and 4.38.23852. Off by default.
+
+Install kernel and u-boot only after the system update succeeded:
+  - Enabled: no
+  - Category: "Boot (experimental)"
+  - Experimental: yes
+  - Description: |
+      When an update's KoboRoot.tgz fails its check or doesn't unpack, rcS still flashed u-boot, kernel and waveform from .kobo/upgrade. This flashes them only after a successful unpack, and always removes .kobo/upgrade so a later KoboRoot.tgz can't flash stale images. Takes effect for the next update installed while this rcS is in place. (firmware-performance-and-bugs.md B6)
+      
+      NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
+  - ReplaceText: {Find: "\tgunzip -t /mnt/onboard/.kobo/KoboRoot.tgz && tar zxf /mnt/onboard/.kobo/KoboRoot.tgz -C / && ( cat /usr/local/Kobo/revinfo >> /usr/local/Kobo/install.log )\n\tif [ -e /mnt/onboard/.kobo/upgrade ]; then\n\t\t/etc/init.d/upgrade-wifi.sh\n\t\trm -rf /mnt/onboard/.kobo/upgrade\n\tfi\n", Replace: "\tKOBOROOT_OK=0\n\tgunzip -t /mnt/onboard/.kobo/KoboRoot.tgz && tar zxf /mnt/onboard/.kobo/KoboRoot.tgz -C / && KOBOROOT_OK=1\n\t[ $KOBOROOT_OK == 1 ] && ( cat /usr/local/Kobo/revinfo >> /usr/local/Kobo/install.log )\n\tif [ -e /mnt/onboard/.kobo/upgrade ]; then\n\t\t# B6: flash u-boot/kernel/waveform only if the root file system was installed;\n\t\t# remove the images either way so a later KoboRoot.tgz never flashes stale ones\n\t\t[ $KOBOROOT_OK == 1 ] && /etc/init.d/upgrade-wifi.sh\n\t\trm -rf /mnt/onboard/.kobo/upgrade\n\tfi\n"}
+
+Keep /etc/passwd intact when adding root:
+  - Enabled: no
+  - Category: "Boot (experimental)"
+  - Experimental: yes
+  - Description: |
+      On the first start after an update, rcS could join all lines of /etc/passwd into one when root was missing (unquoted $(cat)). This writes the file line by line and atomically. (firmware-performance-and-bugs.md B7)
+      
+      NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
+  - ReplaceText: {Find: "\t\tif [ -z $USER_EXISTS ]; then\n\t\t\techo -e \"$(grep '^root:' /etc/passwds/passwd-$PRODUCT_BASE_NAME)\\n\"$(cat $PASSWD_PATH) > $PASSWD_PATH\n", Replace: "\t\tif [ -z \"$USER_EXISTS\" ]; then\n\t\t\t# B7: keep the existing lines intact (no word splitting, no echo -e escapes); atomic\n\t\t\t{ grep '^root:' /etc/passwds/passwd-$PRODUCT_BASE_NAME; cat $PASSWD_PATH; } > $PASSWD_PATH.new && mv $PASSWD_PATH.new $PASSWD_PATH\n"}
+  - ReplaceText: {Find: "\t\telif [ -z $PASS_EXISTS ]; then\n", Replace: "\t\telif [ -z \"$PASS_EXISTS\" ]; then\n"}
+
+Rebuild a broken or outdated /dev cache:
+  - Enabled: no
+  - Category: "Boot (experimental)"
+  - Experimental: yes
+  - Description: |
+      rcS restores /dev from /etc/udev.tgz without checking it, so a cache cut short by power loss (or left from an older kernel) is used at every start; a missing /dev/mmcblk0p3 then looks like a corrupt disk and leads to the factory-reset screen. This uses the cache only if it is a complete archive, matches the running kernel and firmware, and gives the user partition and /dev/null; otherwise it does the full device scan and rebuilds the cache atomically. (firmware-performance-and-bugs.md B8)
+      
+      NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
+  - ReplaceText: {Find: "[ \"$(ls -s /etc/udev.tgz | awk '{print $1}')\" == 0 ] && rm -rf /etc/udev.tgz\nif [ $PLATFORM == freescale ] || [ ! -e /etc/udev.tgz ]; then\n\t/sbin/udevadm control --env=STARTUP=1\n\t/sbin/udevadm trigger\n\t/sbin/udevadm settle --timeout=2\n\t/sbin/udevadm control --env=STARTUP=\n\t[ $PLATFORM != freescale ] && tar cpzf /etc/udev.tgz /dev &\nelse\n\ttar zxf /etc/udev.tgz -C /\nfi\n", Replace: "# B8: use the /dev cache only if it is complete and was made by this kernel and firmware;\n# otherwise do the full trigger and rebuild the cache atomically in the background\nUDEV_CACHE=/etc/udev.tgz\nUDEV_STAMP=\"$(uname -r -v) $(cat /usr/local/Kobo/revinfo 2>/dev/null)\"\nif [ $PLATFORM != freescale ] && [ -s $UDEV_CACHE ] && [ \"$(cat $UDEV_CACHE.stamp 2>/dev/null)\" == \"$UDEV_STAMP\" ] && gunzip -t $UDEV_CACHE 2>/dev/null && tar zxf $UDEV_CACHE -C / && [ -b $ONBOARD_PARTITION ] && [ -c /dev/null ]; then\n\t: # /dev restored from the cache\nelse\n\trm -f $UDEV_CACHE $UDEV_CACHE.stamp $UDEV_CACHE.tmp\n\t/sbin/udevadm control --env=STARTUP=1\n\t/sbin/udevadm trigger\n\t/sbin/udevadm settle --timeout=2\n\t/sbin/udevadm control --env=STARTUP=\n\t[ $PLATFORM != freescale ] && ( tar cpzf $UDEV_CACHE.tmp /dev && gunzip -t $UDEV_CACHE.tmp && sync && mv $UDEV_CACHE.tmp $UDEV_CACHE && echo \"$UDEV_STAMP\" > $UDEV_CACHE.stamp && sync ) &\nfi\n"}

@@ -103,7 +103,7 @@ kobopatch: it patches the firmware named in the config with the enabled patches.
 | `-f FILE`, `--firmware FILE` | Use this firmware instead of the one in `in:`. Either a firmware update zip, or a `.tar.xz` from [kobopatch-testdata](https://github.com/pgaskin/kobopatch-testdata) (a flat archive of the binaries, used for testing patches without the full firmware). |
 | `-t`, `--run-tests` | Don't build a `KoboRoot.tgz`. Instead apply every patch of every patch file **on its own** to a fresh copy of its target and report which ones apply (✔) and which fail (✕), with the errors at the end. Useful to check a patch set against a firmware version. Only works with YAML patch files. Exits with status 1 if any patch fails. |
 | `--check-elf` | After patching each program or library, parse it again and check that it is still well-formed: same size and headers, intact dynamic section and symbol tables, and consistent binding (eager binding and RELRO removed together, never one without the other), and that every stubbed function and removed call is still in place. Prints `CHECK-ELF ok` per file. Recommended when you use the ELF instructions. |
-| `--list` | List every patch of the set by category: `[x]` on, `[ ]` off, its id, name, the files it patches, its group and NEW/EXPERIMENTAL. Add `--json` for JSON. Doesn't patch. |
+| `--list` | List every patch of the set by category: `[x]` on, `[ ]` off, its id, name, the files it patches, its group, NEW/EXPERIMENTAL and NOT RECOMMENDED. Add `--json` for JSON. Doesn't patch. |
 | `--select` | Choose patches in the menu (see [The menu](#the-menu)). **s** saves the choice to `kobopatch.yaml`; **p** saves and patches. |
 | `--enable PATCH` | Switch a patch on for this run. `PATCH` is its id (from `--list`) or name; `*` and `?` are wildcards. Repeatable. Switching on a patch switches off the others in its group. |
 | `--disable PATCH` | Switch a patch off for this run. Repeatable. |
@@ -295,6 +295,9 @@ files:
     dest: etc/kobo.qss
     if: "src/libnickel/experimental.yaml: Use a stylesheet pruned for the Aura H2O"
     mode: 0644
+  firmware:etc/images/dragon-on-0.raw.gz:
+    dest: etc/images/dahlia-on-0.raw.gz
+    mode: 0644
 symlinks:
   usr/share/hyphen/hyph_de.dic: usr/share/hyphen/hyph_de_DE.dic
 ```
@@ -310,7 +313,7 @@ symlinks:
 | `overrides` | Patch file (spelled exactly as in `patches`) → patch name → `yes`/`no`. Overrides the `Enabled` state of those patches. A name that doesn't exist is an error. |
 | `lrelease` | Path to Qt's `lrelease`, used for `translations`. Default: found on the PATH (also as `lrelease-qt6`/`lrelease-qt5` and in the usual Qt install folders). |
 | `translations` | Qt translation source (`.ts`) → path of the compiled `.qm` inside `KoboRoot.tgz`, which must start with `usr/local/Kobo/translations/`. |
-| `files` | Local file → path (or list of paths) inside `KoboRoot.tgz` where it is installed. Paths must not start with `/`. Files are installed with mode 0777, owned by root. A path can also be written as `{dest: PATH, if: "PATCHFILE: patch name", mode: 0644}`: then the file is only added when that patch is on, with that mode. |
+| `files` | Local file → path (or list of paths) inside `KoboRoot.tgz` where it is installed. Paths must not start with `/`. Files are installed with mode 0777, owned by root. A path can also be written as `{dest: PATH, if: "PATCHFILE: patch name", mode: 0644}`: then the file is only added when that patch is on, with that mode. kobopatcher extension: a source written `firmware:PATH` copies `PATH` from the firmware's own `KoboRoot.tgz` (following its symlinks; the last entry of a path counts), so a set can install a renamed copy of a firmware file without shipping it. An empty or missing file is an error; a kobopatch-testdata tarball has no such files. |
 | `symlinks` | Target → symlink path, both inside `KoboRoot.tgz`. The target must be one of the `files` destinations; the link points to `/<target>`. |
 
 Unknown keys and duplicate keys are errors, which catches typos.
@@ -332,8 +335,8 @@ Increase the maximum font size:
 
 - Patches are applied in alphabetical order of their names. Before each patch,
   the *base address* (the position that offsets count from) is reset to 0.
-- `Enabled` (`yes`/`no`), `Description`, `PatchGroup`, `Category` and
-  `Experimental` describe the patch; everything else changes the file. A patch must
+- `Enabled` (`yes`/`no`), `Description`, `PatchGroup`, `Category`,
+  `Experimental` and `NotRecommended` describe the patch; everything else changes the file. A patch must
   contain at least one instruction that changes something.
 - Only one patch per `PatchGroup` may be enabled.
 - Numbers can be decimal (`16`), hex (`0x10`), octal (`0o20` or `020`) or binary
