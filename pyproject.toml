@@ -17,7 +17,7 @@ license-files = [
 ]
 authors = [{ name = "kebasaa" }]
 requires-python = ">=3.10"
-dependencies = ["PyYAML>=6.0"]
+dependencies = ["PyYAML>=6.0", "windows-curses>=2.3; sys_platform == 'win32'"]
 classifiers = [
     "Environment :: Console",
     "Operating System :: OS Independent",
@@ -41,7 +41,7 @@ kobopatcher-symdump = "kobopatcher.symdump:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-kobopatcher = ["patchlib/LICENSE.cssparse", "patchlib/LICENSE.zlib", "patchlib/_armasm/LICENSE", "patchlib/_demangle/LICENSE"]
+kobopatcher = ["data/*.yaml", "patchlib/LICENSE.cssparse", "patchlib/LICENSE.zlib", "patchlib/_armasm/LICENSE", "patchlib/_demangle/LICENSE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

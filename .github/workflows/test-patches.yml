@@ -1,12 +1,17 @@
 name: test-patches
 
-# Applies every patch of the latest kobopatch-patches release, one at a time,
-# to the binaries in kobopatch-testdata (like kobopatch's own CI).
+# Applies every patch, one at a time, to the binaries in kobopatch-testdata:
+# the latest kobopatch-patches release (like kobopatch's own CI) and
+# kobopatcher's own patch sets in src/versions.
 
 on:
   push:
     branches: [main]
+    paths: ["src/**", "tools/test_patches.py", ".github/workflows/test-patches.yml"]
   pull_request:
+    paths: ["src/**", "tools/test_patches.py", ".github/workflows/test-patches.yml"]
+  schedule:
+    - cron: "17 4 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -23,10 +28,22 @@ jobs:
       - name: Install
         run: python -m pip install .
       - name: Get kobopatch-patches (latest release)
+        # gh uses the job's token; unauthenticated API calls get rate-limited (403)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          tag=$(curl -fsSL https://api.github.com/repos/pgaskin/kobopatch-patches/releases/latest | python -c "import json,sys; print(json.load(sys.stdin)['tag_name'])")
+          tag=$(gh release view --repo pgaskin/kobopatch-patches --json tagName -q .tagName)
           git clone --depth 1 --branch "$tag" https://github.com/pgaskin/kobopatch-patches.git patches
+      - name: Cache kobopatch-testdata
+        id: testdata
+        uses: actions/cache@v4
+        with:
+          path: testdata
+          key: kobopatch-testdata-v1
       - name: Get kobopatch-testdata
-        run: git clone --depth 1 --branch v1 https://github.com/pgaskin/kobopatch-testdata.git testdata
-      - name: Test all patches
+        if: steps.testdata.outputs.cache-hit != 'true'
+        run: git clone --depth 1 --branch v1 https://github.com/pgaskin/kobopatch-testdata.git testdata && rm -rf testdata/.git
+      - name: Test the kobopatch-patches release
         run: python tools/test_patches.py --patches patches --testdata testdata
+      - name: Test kobopatcher's own patch sets
+        run: python tools/test_patches.py --own src/versions --testdata testdata

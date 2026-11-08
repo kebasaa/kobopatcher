@@ -1,0 +1,63 @@
+# kobopatcher patch set for Kobo firmware 4.38.23852 (made for the Kobo Aura H2O, N250).
+# Put the firmware zip next to this file (or pass it with -f), choose patches with
+#   kobopatcher --select
+# and run kobopatcher. See README.md.
+version: 4.38.23852
+in: kobo-update-4.38.23852.zip
+out: out/KoboRoot.tgz
+log: out/log.txt
+patches:
+  src/libnickel/reading-fonts.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/librmsdk/reading-fonts.yaml: usr/local/Kobo/librmsdk.so.1.0.0
+  src/libnickel/reading-layout.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/librmsdk/reading-layout.yaml: usr/local/Kobo/librmsdk.so.1.0.0
+  src/libnickel/reading-navigation.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/nickel/reading-navigation.yaml: usr/local/Kobo/nickel
+  src/libnickel/home-library.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/nickel/home-library.yaml: usr/local/Kobo/nickel
+  src/libnickel/dictionary.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/nickel/dictionary.yaml: usr/local/Kobo/nickel
+  src/libnickel/device.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/nickel/device.yaml: usr/local/Kobo/nickel
+  src/libnickel/menus.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/libadobe/pdf.yaml: usr/local/Kobo/libadobe.so
+  src/libnickel/experimental.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/lazy/libnickel.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/lazy/librmsdk.yaml: usr/local/Kobo/librmsdk.so.1.0.0
+  src/lazy/libiwnn.yaml: usr/local/Kobo/libiwnn.so.1.0.0
+  src/lazy/libsunpinyin.yaml: usr/local/Kobo/libsunpinyin.so.3.0.0
+  src/lazy/libQtSolutions_IOCompressor-2.3.yaml: usr/local/Kobo/libQtSolutions_IOCompressor-2.3.so.1.0.0
+  src/lazy/libQtConcurrent.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtConcurrent.so.4.6.2
+  src/lazy/libQtCore.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtCore.so.4.6.2
+  src/lazy/libQtDBus.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtDBus.so.4.6.2
+  src/lazy/libQtGui.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtGui.so.4.6.2
+  src/lazy/libQtMultimedia.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtMultimedia.so.4.6.2
+  src/lazy/libQtMultimediaWidgets.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtMultimediaWidgets.so.4.6.2
+  src/lazy/libQtNetwork.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtNetwork.so.4.6.2
+  src/lazy/libQtPrintSupport.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtPrintSupport.so.4.6.2
+  src/lazy/libQtScript.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtScript.so.4.6.2
+  src/lazy/libQtSensors.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtSensors.so.4.6.2
+  src/lazy/libQtSql.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtSql.so.4.6.2
+  src/lazy/libQtSvg.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtSvg.so.4.6.2
+  src/lazy/libQtWebKit.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtWebKit.so.4.6.2
+  src/lazy/libQtWebKitWidgets.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtWebKitWidgets.so.4.6.2
+  src/lazy/libQtWidgets.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtWidgets.so.4.6.2
+  src/lazy/libQtXml.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtXml.so.4.6.2
+  src/lazy/libQtXmlPatterns.yaml: usr/local/Trolltech/QtEmbedded-4.6.2-arm/lib/libQtXmlPatterns.so.4.6.2
+  src/plugins/libboggle.yaml: usr/local/Kobo/libboggle.so
+  src/plugins/librushhour.yaml: usr/local/Kobo/librushhour.so
+  src/plugins/libsolitaire.yaml: usr/local/Kobo/libsolitaire.so
+  src/plugins/libsudoku.yaml: usr/local/Kobo/libsudoku.so
+  src/plugins/libscribble.yaml: usr/local/Kobo/libscribble.so
+  src/plugins/libwikipedia.yaml: usr/local/Kobo/libwikipedia.so
+  src/plugins/libpdb.yaml: usr/local/Kobo/libpdb.so
+  src/plugins/libsandbox.yaml: usr/local/Kobo/libsandbox.so
+  src/boot/rcS.yaml: etc/init.d/rcS
+  src/boot/rcK.yaml: etc/init.d/rcK
+  src/boot/on-animator.yaml: etc/init.d/on-animator.sh
+files:
+  src/kobo.qss:
+    dest: etc/kobo.qss
+    if: "src/libnickel/experimental.yaml: Use a stylesheet pruned for the Aura H2O"
+    mode: 0644
+overrides: {}

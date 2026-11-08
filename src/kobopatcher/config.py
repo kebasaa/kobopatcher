@@ -44,17 +44,45 @@ class Config:
             "Lrelease": self.lrelease,
             "Translations": m(self.translations),
             "Symlinks": m(self.symlinks),
-            "Files": m(self.files),
+            "Files": m({k: [d.dest for d in v] for k, v in self.files.items()}),
         }
         return json.dumps(v, indent=4, ensure_ascii=False)
 
 
+class FileDest:
+    """Where an extra file goes in KoboRoot.tgz, and when."""
+
+    __slots__ = ("dest", "cond", "mode")
+
+    def __init__(self, dest, cond=None, mode=0o777):
+        self.dest, self.cond, self.mode = dest, cond, mode
+
+    def __repr__(self):
+        return "FileDest(%r, cond=%r, mode=%o)" % (self.dest, self.cond, self.mode)
+
+
+_FILE_RULE = Y.Struct(
+    "main.fileDest",
+    [("dest", "dest", Y.String()), ("if", "cond", Y.Ptr(Y.String())), ("mode", "mode", Y.Ptr(Y.Int(32)))],
+)
+
+
 def _string_slice(node):
-    """A list of strings, or a single string."""
-    try:
-        return Y.decode_strict(node, Y.Slice(Y.String()))
-    except Y.YAMLError:
-        return [Y.decode_strict(node, Y.String())]
+    """files: values. A path, a list of paths, or (kobopatcher extension) a
+    mapping {dest, if, mode} or a list mixing paths and such mappings."""
+    from yaml.nodes import MappingNode, SequenceNode
+
+    def one(n):
+        if isinstance(n, MappingNode):
+            r = Y.decode_strict(n, _FILE_RULE)
+            if not r["dest"]:
+                raise Y.YAMLError("line %d: files: dest must be set" % Y.line(n))
+            return FileDest(r["dest"], r["cond"], 0o777 if r["mode"] is None else r["mode"])
+        return FileDest(Y.decode_strict(n, Y.String()))
+
+    if isinstance(node, SequenceNode):
+        return [one(n) for n in node.value]
+    return [one(node)]
 
 
 _CONFIG = Y.Struct(

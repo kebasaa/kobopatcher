@@ -31,6 +31,19 @@ Options:
       --version         print the version and exit
   -h, --help            show this help text
 
+Choosing patches (each patch of the set is an entry, see --list):
+      --list            list the entries by category with their state and id
+                        (add --json for JSON) and exit
+      --select          choose entries in an interactive menu
+      --enable PATCH    switch an entry on (id or name, * and ? globs; repeatable)
+      --disable PATCH   switch an entry off (repeatable)
+      --only PATCH      switch everything off except these (repeatable)
+      --save            write the choice to the overrides: of kobopatch.yaml
+                        (otherwise --enable/--disable/--only apply to this run)
+
+Device (a Kobo connected over USB):
+  kobopatcher device --help
+
 If CONFIG_FILE is not specified, kobopatcher will use ./kobopatch.yaml.
 Use - to read the config from stdin.
 """
@@ -51,6 +64,8 @@ class KoboPatcher:
         self.d = log  # debug log (the log file)
         self.out = None
         self.sums = {}
+        self.known = set()  # (patch file, patch name)
+        self.enabled = set()  # the enabled ones, after overrides
 
     # user output
     @staticmethod
@@ -113,6 +128,10 @@ class KoboPatcher:
                     ps.validate()
                 except KobopatcherError as e:
                     raise wrap(e, "invalid patch file '%s'", pf) from None
+                for n in ps.names():
+                    self.known.add((pf, n))
+                    if getattr(ps, "parsed", None) is not None and ps.parsed[n].enabled:
+                        self.enabled.add((pf, n))
                 try:
                     ps.apply_to(pt)
                 except GoPanic:
@@ -161,7 +180,11 @@ class KoboPatcher:
             return
         self.l("\nAdding additional files")
         for src, dests in self.cfg.files.items():
-            for dest in dests:
+            for fd in dests:
+                dest = fd.dest
+                if fd.cond is not None and not self._enabled(fd.cond):
+                    self.l("  SKIP %-35s  (%s is disabled)" % (src, fd.cond))
+                    continue
                 self.l("  ADD  %-35s  TO  %s" % (src, dest))
                 if dest.startswith("/"):
                     raise RunError("could not add file: destination must not start with a slash")
@@ -170,15 +193,24 @@ class KoboPatcher:
                         buf = f.read()
                 except OSError as e:
                     raise wrap(patchfile.os_err("open", src, e), "could not read additional file '%s'", src) from None
-                self.out.add_file("./" + dest, buf)
+                self.out.add_file("./" + dest, buf, fd.mode)
                 self.out.expected_size += len(buf)
+
+    def _enabled(self, cond):
+        """Whether "PATCHFILE: patch name" was enabled in this run."""
+        pf, sep, name = cond.partition(": ")
+        if not sep or pf not in self.cfg.patches:
+            raise RunError("could not add file: condition %r must be \"PATCHFILE: patch name\" with a patch file from patches" % cond)
+        if (pf, name) not in self.known:
+            raise RunError("could not add file: condition %r: no such patch in %s" % (cond, pf))
+        return (pf, name) in self.enabled
 
     def apply_symlinks(self):
         self.d("\n\nKoboPatch::ApplySymlinks")
         if not self.cfg.symlinks:
             return
         self.l("\nAdding additional symlinks")
-        declared = {d for dests in self.cfg.files.values() for d in dests}
+        declared = {d.dest for dests in self.cfg.files.values() for d in dests}
         for src, dest in self.cfg.symlinks.items():
             self.l("  SYMLINK  %-35s  TO  %s" % (src, dest))
             if src.startswith("/") or src.startswith("."):
@@ -279,6 +311,13 @@ def _build_parser():
         help="re-parse every patched ELF file and check it is still well-formed (dynamic section, program headers, lazy binding vs RELRO, stubs)",
     )
     p.add_argument("--version", action="store_true", help="print the version and exit")
+    p.add_argument("--list", action="store_true")
+    p.add_argument("--json", action="store_true")
+    p.add_argument("--select", action="store_true")
+    p.add_argument("--enable", action="append", default=[], metavar="PATCH")
+    p.add_argument("--disable", action="append", default=[], metavar="PATCH")
+    p.add_argument("--only", action="append", default=[], metavar="PATCH")
+    p.add_argument("--save", action="store_true")
     p.add_argument("config", nargs="*", metavar="CONFIG_FILE")
     return p
 
@@ -294,6 +333,11 @@ def main(argv=None) -> int:
 
 
 def _main(argv=None) -> int:
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if argv and argv[0] == "device":
+        from . import device
+
+        return device.main(argv[1:])
     ap = _build_parser()
     args = ap.parse_args(argv)
     if args.version:
@@ -314,13 +358,15 @@ def _main(argv=None) -> int:
 
     patchfile.set_log(plog)
     banner = "kobopatcher %s\n%s\n" % (__version__, HOMEPAGE)
-    print(banner)
+    # with --list, stdout carries only the list (e.g. --json)
+    say = (lambda m: sys.stderr.write(m + "\n")) if args.list else print
+    say(banner)
     d(banner)
 
     conf = args.config[0] if args.config else "kobopatch.yaml"
     fw = os.path.abspath(args.firmware) if args.firmware else ""
 
-    print("Loading configuration from %s" % conf)
+    say("Loading configuration from %s" % conf)
     try:
         if conf == "-":
             buf = sys.stdin.buffer.read()
@@ -350,6 +396,20 @@ def _main(argv=None) -> int:
         return 1
     d("  | " + cfg.to_json().replace("\n", "\n  | "))
 
+    if args.list or args.select or args.enable or args.disable or args.only or args.save:
+        rc = _selection(cfg, args, conf)
+        if rc is not None:
+            return rc
+
+    if not go_compat():
+        # kobopatch required out/ and the log's folder to exist already
+        for path in (cfg.log, cfg.out):
+            folder = os.path.dirname(path)
+            if folder and not os.path.isdir(folder):
+                try:
+                    os.makedirs(folder, exist_ok=True)
+                except OSError:
+                    pass
     try:
         lf = open(cfg.log, "w", encoding="utf-8")
     except OSError as e:
@@ -362,6 +422,48 @@ def _main(argv=None) -> int:
             d("firmware file overridden from command line: %s" % fw)
             cfg.in_ = fw
         return _run(cfg, args, d)
+
+
+def _selection(cfg, args, conf):
+    """--list, --select, --enable/--disable/--only and --save.
+
+    Returns an exit status to stop with, or None to go on patching (with the
+    selection put into cfg.overrides).
+    """
+    from . import catalog
+
+    try:
+        cat = catalog.PatchCatalog(cfg)
+        cat.apply_flags(args.enable, args.disable, args.only)
+    except KobopatcherError as e:
+        sys.stderr.write("Error: %s\n" % e)
+        return 1
+    conf_file = os.path.basename(conf)
+    if args.select:
+        from . import tui
+
+        action = tui.run(cat, conf_file)
+        if action == "quit":
+            return 0
+        if action in ("save", "patch"):
+            if conf == "-":
+                sys.stderr.write("Error: can't save the selection of a config read from stdin\n")
+                return 1
+            bak = catalog.save_overrides(conf_file, cat.overrides())
+            print("Saved the selection to %s (backup: %s)" % (conf, os.path.basename(bak)))
+        if action != "patch":
+            return 0
+    elif args.save:
+        if conf == "-":
+            sys.stderr.write("Error: can't save the selection of a config read from stdin\n")
+            return 1
+        bak = catalog.save_overrides(conf_file, cat.overrides())
+        print("Saved the selection to %s (backup: %s)" % (conf, os.path.basename(bak)))
+    if args.list:
+        print(cat.to_json() if args.json else cat.format_list())
+        return 0
+    cat.apply_to_config()
+    return None
 
 
 def _run(cfg, args, d) -> int:
