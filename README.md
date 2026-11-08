@@ -173,6 +173,8 @@ more of the small sizes and fewer of the large sizes. ...
 - Patches marked **NEW** are experimental: they apply to the firmware, but nobody
   has run them on a device yet. Leave them off at first; if you want to try them,
   switch them on one at a time (each patch set's README gives an order).
+- Patches marked **NOT RECOMMENDED** (in red) work, but are best left off; the
+  description says why. "All on" leaves them off.
 - Some patches are switched on by default: the well-known community patches that
   most people want. You can switch them off.
 - Press **/** to search, **?** for all keys, **q** to quit without building.

@@ -1,0 +1,23 @@
+
+/* Home-screen wallpaper (docs/app-development.md section 5.3).
+   HomePageView paints no style-sheet background itself; its full-size child
+   #mainContainer (a GenericContainerWidget, which sets WA_StyledBackground)
+   does. If the image is missing or unreadable, Qt draws only the white
+   background-color, as without this block. Image: grayscale PNG, about
+   1080x1430, pre-dithered to 16 levels; it is drawn unscaled and centred. */
+HomePageView #mainContainer {
+  background-color: white;
+  background-image: url(/mnt/onboard/.adds/wallpaper/home.png);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* Let the wallpaper show between the rows; the book tiles keep their white. */
+HomePageView #mainContainer > QWidget {
+  background-color: transparent;
+}
+/* Dark mode: no wallpaper (the text turns white). */
+*[darkMode=true] HomePageView #mainContainer,
+HomePageView #mainContainer[darkMode=true] {
+  background-color: black;
+  background-image: none;
+}

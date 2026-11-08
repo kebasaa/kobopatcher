@@ -329,3 +329,12 @@ def test_github_release_fallback(monkeypatch):
     monkeypatch.setattr(fetch, "_open", lambda u, method="GET", accept=None: (_ for _ in ()).throw(fetch.FetchError("404", 404)))
     with pytest.raises(fetch.FetchError, match="404"):
         fetch.get_bytes(url)
+
+
+def test_set_requires_newer_kobopatcher():
+    from kobopatcher import patchsets
+
+    patchsets.check_requires({"version": "4.38.1", "requires": "0.2.0"}, "0.2.0")
+    patchsets.check_requires({"version": "4.38.1"}, "0.1.0")  # sets without requires are fine
+    with pytest.raises(patchsets.PatchSetError, match="needs kobopatcher 0.3.0 or newer"):
+        patchsets.check_requires({"version": "4.38.1", "requires": "0.3.0"}, "0.2.0")

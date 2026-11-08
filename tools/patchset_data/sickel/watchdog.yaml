@@ -1,0 +1,24 @@
+# Patches for usr/local/Kobo/sickel (watchdog). Byte-identical in 4.38.23429 and 4.38.23852.
+# Numeric file offsets on purpose: file offset = vaddr - 0x10000.
+
+Watchdog - allow 140 s instead of 70 s without a ping:
+  - Enabled: no
+  - Category: "Watchdog (experimental)"
+  - Experimental: yes
+  - PatchGroup: sickel tolerance
+  - Description: |
+      sickel counts 10 s ticks without a ping from nickel and kills nickel (SIGSEGV, then reboot) at the 7th, about 70 s after the last ping. This moves it to the 14th tick (about 140 s; reboot at 150 s), so long database work is less likely to be killed. A real freeze takes twice as long to recover. Keep nickel's ping interval below 10 s. File 0x3164 in both builds. Not yet run on a device.
+  - BaseAddress: 0x3164
+  - ReplaceBytes: {FindH: 06 2B FB 44, ReplaceH: 0D 2B FB 44}
+
+Watchdog - 20 s ticks instead of 10 s:
+  - Enabled: no
+  - Category: "Watchdog (experimental)"
+  - Experimental: yes
+  - PatchGroup: sickel tolerance
+  - Description: |
+      Alternative to the 140 s patch: Ping and Resume restart the watchdog timer with 20 s instead of 10 s, so nickel is killed about 140 s after the last ping (reboot at 160 s). Keep nickel's ping interval below 20 s. File 0x3000 and 0x3012 in both builds. Not yet run on a device.
+  - BaseAddress: 0x3000
+  - ReplaceBytes: {FindH: 42 F2 10 71, ReplaceH: 44 F6 20 61}
+  - BaseAddress: 0x3012
+  - ReplaceBytes: {FindH: 42 F2 10 71, ReplaceH: 44 F6 20 61}

@@ -1,0 +1,1308 @@
+* {
+background-color: white;
+}
+*[darkMode=true],
+*[darkMode=true] * {
+color: white;
+  background-color: black;
+}
+QWidget[smallIconHeight=true][qApp_deviceIsDragon=true] {
+min-height: 32px;
+  max-height: 32px;
+}
+QWidget[smallIconWidth=true][qApp_deviceIsDragon=true] {
+min-width: 32px;
+  max-width: 32px;
+}
+QWidget[headerIconHeight=true][qApp_deviceIsDragon=true] {
+min-height: 56px;
+  max-height: 56px;
+}
+QWidget[headerIconWidth=true][qApp_deviceIsDragon=true] {
+min-width: 56px;
+  max-width: 56px;
+}
+QWidget[smallFixedHeight=true][qApp_deviceIsDragon=true] {
+min-height: 24px;
+  max-height: 24px;
+}
+QWidget[smallFixedWidth=true][qApp_deviceIsDragon=true] {
+min-width: 24px;
+  max-width: 24px;
+}
+QWidget[regularFixedHeight=true][qApp_deviceIsDragon=true] {
+min-height: 70px;
+  max-height: 70px;
+}
+QWidget[regularFixedWidth=true][qApp_deviceIsDragon=true] {
+min-width: 70px;
+  max-width: 70px;
+}
+QWidget[hugeFixedHeight=true][qApp_deviceIsDragon=true] {
+min-height: 150px;
+  max-height: 150px;
+}
+QWidget[largeFixedHeight=true][qApp_deviceIsDragon=true] {
+min-height: 140px;
+  max-height: 140px;
+}
+QWidget[footerFixedHeight=true][qApp_deviceIsDragon=true] {
+min-height: 120px;
+  max-height: 120px;
+}
+QCheckBox {
+font-family: Georgia;
+  font-style: italic;
+}
+QCheckBox[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+QCheckBox[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+QCheckBox[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+  padding-right: 22px;
+}
+QCheckBox[qApp_deviceIsDragon=true] {
+spacing: 22px;
+}
+QCheckBox[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+QCheckBox[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+QCheckBox[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+QCheckBox[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+QCheckBox::indicator:unchecked {
+image: url(:/images/widgets/settings_checkbox_off.png);
+}
+QCheckBox::indicator:unchecked:disabled {
+image: url(:/images/widgets/settings_checkbox_off_disabled.png);
+}
+QCheckBox::indicator:checked {
+image: url(:/images/widgets/settings_checkbox_on.png);
+}
+QCheckBox::indicator:checked:disabled {
+image: url(:/images/widgets/settings_checkbox_on_disabled.png);
+}
+QRadioButton {
+font-family: Georgia;
+}
+QRadioButton[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+QRadioButton[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+QRadioButton[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+  padding-right: 22px;
+}
+QRadioButton[qApp_deviceIsDragon=true] {
+spacing: 10px;
+}
+QRadioButton[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+QRadioButton[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+QRadioButton[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+QRadioButton[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+QRadioButton::indicator:unchecked {
+image: url(:/images/widgets/radio_btn_off.png);
+}
+QRadioButton::indicator:checked {
+image: url(:/images/widgets/radio_btn_on.png);
+}
+QSlider {
+background-color: white;
+}
+QSlider[qApp_deviceIsDragon=true] {
+min-height: 70px;
+  max-height: 70px;
+}
+QSlider::groove:horizontal {
+margin-left: 10px;
+  margin-right: 10px;
+  height: 1px;
+  background-color: black;
+}
+QSlider[thickLineEnabled=true]::sub-page:horizontal {
+margin-left: 10px;
+  border-top: 3px solid black;
+  border-bottom: 3px solid black;
+}
+QSlider[inverseThickLineEnabled=true]::add-page:horizontal {
+margin-left: 10px;
+  border-top: 3px solid black;
+  border-bottom: 3px solid black;
+}
+QSlider::handle:horizontal {
+image: url(:/images/reading/scrubber_handle_off.png);
+  margin-left: -10px;
+  margin-right: -10px;
+}
+QSlider::handle:horizontal[qApp_deviceIsDragon=true] {
+width: 56px;
+  height: 56px;
+  margin-top: -28px;
+  margin-bottom: -28px;
+}
+QSlider::handle:horizontal:pressed {
+image: url(:/images/reading/scrubber_handle_hit.png);
+  margin-left: -10px;
+  margin-right: -10px;
+}
+QSlider::handle:horizontal:pressed[qApp_deviceIsDragon=true] {
+width: 56px;
+  height: 56px;
+  margin-top: -28px;
+  margin-bottom: -28px;
+}
+QSlider[noHandle=true]::handle:horizontal {
+image: none;
+  width: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+QSlider[noHandle=true]::handle:horizontal:pressed {
+image: none;
+  width: 0px;
+}
+QScrollBar {
+background: black;
+}
+QScrollBar[qApp_deviceIsDragon=true] {
+max-width: 2px;
+  min-width: 2px;
+  margin: 16px;
+}
+QScrollBar::handle {
+background: white;
+}
+QScrollBar::handle[qApp_deviceIsDragon=true] {
+border: 2px solid black;
+  max-width: 11px;
+  min-width: 11px;
+  min-height: 38px;
+  border-radius: 5px;
+}
+QScrollBar::handle:pressed {
+-qt-border-anti-alias: disabled;
+  background: black;
+}
+QScrollBar::add-page,
+QScrollBar::sub-page {
+background: transparent;
+}
+QScrollBar::add-line,
+QScrollBar::sub-line {
+height: 0px;
+  width: 0px;
+}
+TouchSlider[qApp_deviceIsDragon=true] {
+qproperty-handleWidth: 56;
+}
+QProgressBar[qApp_deviceIsDragon=true] {
+min-height: 15px;
+  max-height: 15px;
+}
+QFrame[hasPadding=true][qApp_deviceIsDragon=true] {
+padding: 50px;
+  padding-top: 70px;
+}
+QFrame[hasPadding=true][qApp_deviceIsDragon=true][localeName="ja"] {
+padding: 60px;
+}
+QFrame[hugeHMargin=true][qApp_deviceIsDragon=true] {
+margin-left: 150px;
+  margin-right: 150px;
+}
+TouchLabel[localeName="zh"] {
+qproperty-leading: 0;
+}
+TouchLabel[localeName="zh-HK"] {
+qproperty-leading: 0;
+}
+TouchLabel[localeName="zh-TW"] {
+qproperty-leading: 0;
+}
+N3ButtonLabel {
+font-family: Georgia;
+  font-style: italic;
+  margin: 0px;
+  qproperty-forceRepaintOnInvert: true;
+  qproperty-highQualityInvert: false;
+}
+N3ButtonLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+N3ButtonLabel[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+N3ButtonLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+  padding-right: 22px;
+}
+N3ButtonLabel[qApp_deviceIsDragon=true] {
+min-height: 70px;
+  max-height: 70px;
+}
+N3ButtonLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+N3ButtonLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+N3ButtonLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+N3ButtonLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+N3ButtonLabel[primaryButton=true] {
+qproperty-alignment: AlignCenter;
+}
+N3ButtonLabel[primaryButton=true][qApp_deviceIsDragon=true] {
+min-width: 140px;
+}
+N3ButtonLabel[borderedButton=true] {
+border: 1px solid black;
+  qproperty-alignment: AlignCenter;
+}
+N3ButtonLabel[labelSize="medium"][qApp_deviceIsDragon=true] {
+font-size: 46px;
+}
+N3ButtonLabel[labelSize="small"][qApp_deviceIsDragon=true] {
+font-size: 36px;
+}
+N3ButtonLabel[fontStyle="normal"] {
+font-style: normal;
+}
+TextHeader N3ButtonLabel {
+padding-left: 5px;
+  padding-right: 5px;
+}
+SmallButtonLabel {
+font-family: Avenir;
+  font-style: normal;
+  text-transform: uppercase;
+  qproperty-indent: 0;
+}
+SmallButtonLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+SmallButtonLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+SmallButtonLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+SmallButtonLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+SmallButtonLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+SmallButtonLabel[localeName="tr-TR"] {
+font-family: Georgia;
+}
+SmallButtonLabel[localeName="tr-TR"][qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+SmallButtonLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+SmallButtonLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+SmallButtonLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+SmallButtonLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+SmallButtonLabel[qApp_deviceIsDragon=true] {
+padding-left: 10px;
+  padding-right: 10px;
+}
+SmallButtonLabel[qApp_deviceIsDragon=true] {
+padding-top: 10px;
+  padding-bottom: 10px;
+}
+SmallButtonLabel[qApp_deviceIsDragon=true] {
+font-size: 24px;
+  min-height: 0px;
+}
+TouchLineEdit {
+font-family: Georgia;
+  font-style: normal;
+  border: 1px solid black;
+  margin: 2px;
+  color: #000000;
+}
+TouchLineEdit[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+TouchLineEdit[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+TouchLineEdit[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+  padding-right: 22px;
+}
+TouchLineEdit[qApp_deviceIsDragon=true] {
+min-height: 70px;
+  max-height: 70px;
+}
+TouchLineEdit[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+TouchLineEdit[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+TouchLineEdit[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+TouchLineEdit[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+TouchLineEdit:focus {
+border: 3px solid black;
+  margin: 0px;
+}
+BlockTouchDropDown[qApp_deviceIsDragon=true],
+MultiSelectBlockTouchDropDown[qApp_deviceIsDragon=true] {
+min-height: 70px;
+  max-height: 70px;
+}
+DisplayLabel {
+font-family: Georgia;
+  font-size: 50px;
+}
+DisplayLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+DisplayLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+DisplayLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+DisplayLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+DisplayLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+DisplayLabel[qApp_deviceIsDragon=true] {
+font-size: 71px;
+}
+DisplayLabel[qApp_deviceIsDragon=true][localeName="ja"] {
+font-size: 57px;
+}
+SmallIconLabel[qApp_deviceIsDragon=true] {
+min-width: 21px;
+  max-width: 21px;
+  min-height: 21px;
+  max-height: 21px;
+}
+HeaderMediumElidedLabel,
+HeaderMediumTouchLabel,
+HeaderMediumLabel {
+font-family: Georgia;
+  qproperty-alignment: 'AlignLeft|AlignVCenter';
+}
+HeaderMediumElidedLabel[qApp_dyslexic=true],
+HeaderMediumTouchLabel[qApp_dyslexic=true],
+HeaderMediumLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+HeaderMediumElidedLabel[qApp_deviceIsDragon=true],
+HeaderMediumTouchLabel[qApp_deviceIsDragon=true],
+HeaderMediumLabel[qApp_deviceIsDragon=true] {
+font-size: 46px;
+}
+HeaderMediumElidedLabel[qApp_deviceIsDragon=true],
+HeaderMediumTouchLabel[qApp_deviceIsDragon=true],
+HeaderMediumLabel[qApp_deviceIsDragon=true] {
+padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+HeaderMediumElidedLabel[localeName="ja"],
+HeaderMediumTouchLabel[localeName="ja"],
+HeaderMediumLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+HeaderMediumElidedLabel[localeName="zh"],
+HeaderMediumTouchLabel[localeName="zh"],
+HeaderMediumLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+HeaderMediumElidedLabel[localeName="zh-HK"],
+HeaderMediumTouchLabel[localeName="zh-HK"],
+HeaderMediumLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+HeaderMediumElidedLabel[localeName="zh-TW"],
+HeaderMediumTouchLabel[localeName="zh-TW"],
+HeaderMediumLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+HeaderSmallLabel {
+font-family: Georgia;
+  font-size: 23px;
+}
+HeaderSmallLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+HeaderSmallLabel[qApp_deviceIsDragon=true] {
+font-size: 36px;
+}
+HeaderSmallLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+HeaderSmallLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+HeaderSmallLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+HeaderSmallLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+HeaderSmallElidedLabel,
+HeaderSmallItalicLabel {
+font-family: Georgia;
+  font-style: italic;
+  font-size: 23px;
+  padding-left: 12px;
+  padding-right: 12px;
+  qproperty-alignment: 'AlignLeft|AlignVCenter';
+}
+HeaderSmallElidedLabel[qApp_dyslexic=true],
+HeaderSmallItalicLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+HeaderSmallElidedLabel[qApp_deviceIsDragon=true],
+HeaderSmallItalicLabel[qApp_deviceIsDragon=true] {
+font-size: 36px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+HeaderSmallElidedLabel[localeName="ja"],
+HeaderSmallItalicLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+HeaderSmallElidedLabel[localeName="zh"],
+HeaderSmallItalicLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+HeaderSmallElidedLabel[localeName="zh-HK"],
+HeaderSmallItalicLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+HeaderSmallElidedLabel[localeName="zh-TW"],
+HeaderSmallItalicLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+RegularAdjustingLabel {
+font-family: Georgia;
+}
+RegularAdjustingLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+RegularAdjustingLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+RegularAdjustingLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+RegularAdjustingLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularAdjustingLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularAdjustingLabel[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+RegularAdjustingLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+}
+RegularAdjustingLabel[qApp_deviceIsDragon=true][localeName="ja"] {
+font-size: 27px;
+}
+RegularLabel {
+font-family: Georgia;
+}
+RegularLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+RegularLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+RegularLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+RegularLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularLabel[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+RegularLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+}
+RegularLabel[qApp_deviceIsDragon=true][localeName="ja"] {
+font-size: 27px;
+}
+RegularLabelVPadded[qApp_deviceIsDragon=true] {
+padding-top: 22px;
+  padding-bottom: 22px;
+}
+HeaderBarLabel,
+RegularReversibleLabel,
+SliderTouchLabel {
+font-family: Georgia;
+}
+HeaderBarLabel[qApp_dyslexic=true],
+RegularReversibleLabel[qApp_dyslexic=true],
+SliderTouchLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+HeaderBarLabel[qApp_deviceIsDragon=true],
+RegularReversibleLabel[qApp_deviceIsDragon=true],
+SliderTouchLabel[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+HeaderBarLabel[qApp_deviceIsDragon=true],
+RegularReversibleLabel[qApp_deviceIsDragon=true],
+SliderTouchLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+}
+HeaderBarLabel[localeName="ja"],
+RegularReversibleLabel[localeName="ja"],
+SliderTouchLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+HeaderBarLabel[localeName="zh"],
+RegularReversibleLabel[localeName="zh"],
+SliderTouchLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+HeaderBarLabel[localeName="zh-HK"],
+RegularReversibleLabel[localeName="zh-HK"],
+SliderTouchLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+HeaderBarLabel[localeName="zh-TW"],
+RegularReversibleLabel[localeName="zh-TW"],
+SliderTouchLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+HeaderBarLabel[qApp_deviceIsDragon=true] {
+padding-right: 22px;
+}
+RegularTouchLabel {
+font-family: Georgia;
+  font-style: italic;
+}
+RegularTouchLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+RegularTouchLabel[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+RegularTouchLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+}
+RegularTouchLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+RegularTouchLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+RegularTouchLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularTouchLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularTouchLabel[underline=true] {
+text-decoration: underline;
+}
+RegularTouchLabelVPadded[qApp_deviceIsDragon=true] {
+padding-top: 22px;
+  padding-bottom: 22px;
+}
+RegularTouchLabelVPadded[qApp_isFontScaleLarge=true][qApp_deviceIsDragon=true] {
+padding-top: 18px;
+  padding-bottom: 18px;
+}
+RegularBorderTouchLabel {
+border: 2px solid #d9d9d9;
+  qproperty-alignment: AlignCenter;
+}
+RegularBorderTouchLabel[qApp_deviceIsDragon=true] {
+padding-right: 22px;
+}
+RegularBorderTouchLabel[qApp_deviceIsDragon=true] {
+min-height: 70px;
+  max-height: 70px;
+}
+RegularElidedLabel {
+font-family: Georgia;
+}
+RegularElidedLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+RegularElidedLabel[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+RegularElidedLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+}
+RegularElidedLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+RegularElidedLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+RegularElidedLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+RegularElidedLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  qproperty-forceLeading: 5;
+}
+RegularElidableLabel {
+font-family: Georgia;
+  background-color: white;
+}
+RegularElidableLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+RegularElidableLabel[qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+RegularElidableLabel[qApp_deviceIsDragon=true] {
+min-height: 70px;
+  max-height: 70px;
+}
+RegularElidableLabel[qApp_deviceIsDragon=true] {
+padding-top: 4px;
+  padding-bottom: 4px;
+}
+RegularElidableLabel[italics=true] {
+font-style: italic;
+}
+RegularElidableLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+RegularElidableLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+RegularElidableLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularElidableLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularItalicLabel {
+font-style: italic;
+}
+RegularItalicLabel[localeName="ja"][qApp_deviceIsDragon=true] {
+font-size: 29px;
+}
+RegularSansSerifLabel,
+RegularSansSerifElidedLabel {
+font-family: Avenir;
+}
+RegularSansSerifLabel[qApp_dyslexic=true],
+RegularSansSerifElidedLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+RegularSansSerifLabel[localeName="ja"],
+RegularSansSerifElidedLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+RegularSansSerifLabel[localeName="zh"],
+RegularSansSerifElidedLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+RegularSansSerifLabel[localeName="zh-HK"],
+RegularSansSerifElidedLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularSansSerifLabel[localeName="zh-TW"],
+RegularSansSerifElidedLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+RegularSansSerifLabel[localeName="tr-TR"],
+RegularSansSerifElidedLabel[localeName="tr-TR"] {
+font-family: Georgia;
+}
+RegularSansSerifLabel[localeName="tr-TR"][qApp_dyslexic=true],
+RegularSansSerifElidedLabel[localeName="tr-TR"][qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+PageLabel,
+SmallElidedLabel,
+SmallTouchLabel,
+SmallLabel {
+font-family: Georgia;
+}
+PageLabel[qApp_dyslexic=true],
+SmallElidedLabel[qApp_dyslexic=true],
+SmallTouchLabel[qApp_dyslexic=true],
+SmallLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+PageLabel[qApp_deviceIsDragon=true],
+SmallElidedLabel[qApp_deviceIsDragon=true],
+SmallTouchLabel[qApp_deviceIsDragon=true],
+SmallLabel[qApp_deviceIsDragon=true] {
+font-size: 26px;
+}
+PageLabel[qApp_deviceIsDragon=true],
+SmallElidedLabel[qApp_deviceIsDragon=true],
+SmallTouchLabel[qApp_deviceIsDragon=true],
+SmallLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+  padding-right: 22px;
+}
+PageLabel[localeName="ja"],
+SmallElidedLabel[localeName="ja"],
+SmallTouchLabel[localeName="ja"],
+SmallLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+PageLabel[localeName="zh"],
+SmallElidedLabel[localeName="zh"],
+SmallTouchLabel[localeName="zh"],
+SmallLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+PageLabel[localeName="zh-HK"],
+SmallElidedLabel[localeName="zh-HK"],
+SmallTouchLabel[localeName="zh-HK"],
+SmallLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+PageLabel[localeName="zh-TW"],
+SmallElidedLabel[localeName="zh-TW"],
+SmallTouchLabel[localeName="zh-TW"],
+SmallLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+SmallSansSerifLabel,
+SmallSansSerifElidedLabel {
+font-family: Avenir;
+}
+SmallSansSerifLabel[qApp_dyslexic=true],
+SmallSansSerifElidedLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+SmallSansSerifLabel[localeName="ja"],
+SmallSansSerifElidedLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+SmallSansSerifLabel[localeName="zh"],
+SmallSansSerifElidedLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+SmallSansSerifLabel[localeName="zh-HK"],
+SmallSansSerifElidedLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+SmallSansSerifLabel[localeName="zh-TW"],
+SmallSansSerifElidedLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+SmallSansSerifLabel[localeName="tr-TR"],
+SmallSansSerifElidedLabel[localeName="tr-TR"] {
+font-family: Georgia;
+}
+SmallSansSerifLabel[localeName="tr-TR"][qApp_dyslexic=true],
+SmallSansSerifElidedLabel[localeName="tr-TR"][qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+PageLabel {
+font-style: normal;
+}
+PageLabel[goToPageEnabled=true] {
+font-style: italic;
+}
+PageLabel[goToPageEnabled=true][localeName="ja"] {
+font-style: normal;
+}
+PageLabel[goToPageEnabled=true][localeName="zh"] {
+font-style: normal;
+}
+PageLabel[goToPageEnabled=true][localeName="zh-HK"] {
+font-style: normal;
+}
+PageLabel[goToPageEnabled=true][localeName="zh-TW"] {
+font-style: normal;
+}
+MetaDataElidedLabel,
+MetaDataLabel,
+MetaDataAdjustingLabel {
+font-family: Avenir;
+  text-transform: uppercase;
+}
+MetaDataElidedLabel[qApp_dyslexic=true],
+MetaDataLabel[qApp_dyslexic=true],
+MetaDataAdjustingLabel[qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+MetaDataElidedLabel[localeName="ja"],
+MetaDataLabel[localeName="ja"],
+MetaDataAdjustingLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+MetaDataElidedLabel[localeName="zh"],
+MetaDataLabel[localeName="zh"],
+MetaDataAdjustingLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+MetaDataElidedLabel[localeName="zh-HK"],
+MetaDataLabel[localeName="zh-HK"],
+MetaDataAdjustingLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+MetaDataElidedLabel[localeName="zh-TW"],
+MetaDataLabel[localeName="zh-TW"],
+MetaDataAdjustingLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+MetaDataElidedLabel[localeName="tr-TR"],
+MetaDataLabel[localeName="tr-TR"],
+MetaDataAdjustingLabel[localeName="tr-TR"] {
+font-family: Georgia;
+}
+MetaDataElidedLabel[localeName="tr-TR"][qApp_dyslexic=true],
+MetaDataLabel[localeName="tr-TR"][qApp_dyslexic=true],
+MetaDataAdjustingLabel[localeName="tr-TR"][qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+MetaDataElidedLabel[qApp_deviceIsDragon=true],
+MetaDataLabel[qApp_deviceIsDragon=true],
+MetaDataAdjustingLabel[qApp_deviceIsDragon=true] {
+font-size: 25px;
+}
+MetaDataElidedLabel[localeName="ja"],
+MetaDataLabel[localeName="ja"],
+MetaDataAdjustingLabel[localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+MetaDataElidedLabel[localeName="zh"],
+MetaDataLabel[localeName="zh"],
+MetaDataAdjustingLabel[localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+MetaDataElidedLabel[localeName="zh-HK"],
+MetaDataLabel[localeName="zh-HK"],
+MetaDataAdjustingLabel[localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+MetaDataElidedLabel[localeName="zh-TW"],
+MetaDataLabel[localeName="zh-TW"],
+MetaDataAdjustingLabel[localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+  text-transform: none;
+}
+MetaDataElidedLabel[localeName="tr-TR"],
+MetaDataLabel[localeName="tr-TR"],
+MetaDataAdjustingLabel[localeName="tr-TR"] {
+font-family: Georgia;
+}
+MetaDataElidedLabel[localeName="tr-TR"][qApp_dyslexic=true],
+MetaDataLabel[localeName="tr-TR"][qApp_dyslexic=true],
+MetaDataAdjustingLabel[localeName="tr-TR"][qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+MetaDataElidedLabel[localeName="ja"] {
+qproperty-forceLeading: 5;
+}
+MetaDataHeaderLabel {
+background-color: #d9d9d9;
+  border-top: 1px solid black;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+MetaDataHeaderLabel[qApp_deviceIsDragon=true] {
+padding-left: 22px;
+  padding-right: 22px;
+}
+SettingContainer {
+qproperty-topMargin: 5;
+  qproperty-bottomMargin: 5;
+  qproperty-leftMargin: 0;
+  qproperty-rightMargin: 0;
+  qproperty-spacing: 0;
+}
+SettingContainer[qApp_deviceIsDragon=true] {
+min-height: 80px;
+}
+SettingContainer[showBottomLine=true] {
+border-bottom: 1px solid black;
+}
+SettingContainer[showBottomLine=true][qApp_deviceIsDragon=true] {
+min-height: 81px;
+}
+MenuBarContainer {
+background-color: #d9d9d9;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+MenuBarContainer * {
+background-color: transparent;
+}
+MenuBarContainer[qApp_deviceIsDragon=true] {
+min-height: 80px;
+  max-height: 80px;
+}
+PopupHeaderContainer[qApp_deviceIsDragon=true] {
+min-height: 100px;
+  max-height: 100px;
+}
+ProgressContainer[qApp_deviceIsDragon=true] {
+min-height: 35px;
+  max-height: 35px;
+}
+ProgressContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 10px;
+  qproperty-bottomMargin: 10px;
+}
+RegularHorizSpacer[qApp_deviceIsDragon=true] {
+min-width: 22px;
+  max-width: 22px;
+}
+RegularVertSpacer[qApp_deviceIsDragon=true] {
+min-height: 22px;
+  max-height: 22px;
+}
+MediumHorizSpacer[qApp_deviceIsDragon=true] {
+min-width: 44px;
+  max-width: 44px;
+}
+MediumVertSpacer[qApp_deviceIsDragon=true] {
+min-height: 44px;
+  max-height: 44px;
+}
+LargeVertSpacer[qApp_deviceIsDragon=true] {
+min-height: 66px;
+  max-height: 66px;
+}
+SmallMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 10px;
+  qproperty-rightMargin: 10px;
+}
+SmallMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 10px;
+  qproperty-bottomMargin: 10px;
+}
+SmallMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+SmallHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 10px;
+  qproperty-rightMargin: 10px;
+}
+SmallHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+SmallVertMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 10px;
+  qproperty-bottomMargin: 10px;
+}
+SmallVertMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+RegularMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 22px;
+  qproperty-rightMargin: 22px;
+}
+RegularMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 22px;
+  qproperty-bottomMargin: 22px;
+}
+RegularHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 22px;
+  qproperty-rightMargin: 22px;
+}
+RegularHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+RegularVertMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 22px;
+  qproperty-bottomMargin: 22px;
+}
+RegularVertMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+RegularTopMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 22px;
+}
+MediumMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 44px;
+  qproperty-rightMargin: 44px;
+}
+MediumMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 44px;
+  qproperty-bottomMargin: 44px;
+}
+MediumMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+MediumHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 44px;
+  qproperty-rightMargin: 44px;
+}
+MediumHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+MediumTopMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 44px;
+}
+LargeHorizMediumTopMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 66px;
+  qproperty-rightMargin: 66px;
+}
+LargeHorizMediumTopMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 44px;
+}
+LargeHorizMediumTopMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+LargeHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 66px;
+  qproperty-rightMargin: 66px;
+}
+LargeHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+LargeMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 66px;
+  qproperty-rightMargin: 66px;
+}
+LargeMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-topMargin: 66px;
+  qproperty-bottomMargin: 66px;
+}
+LargeMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+HugeHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 150px;
+  qproperty-rightMargin: 150px;
+}
+HugeHorizMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+PagedMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 66px;
+}
+PagedMarginContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 10px;
+}
+QLabel[regularHorizontalPadding=true][qApp_deviceIsDragon=true] {
+padding-left: 22px;
+  padding-right: 22px;
+}
+QLabel[regularVerticalPadding=true][qApp_deviceIsDragon=true] {
+padding-top: 22px;
+  padding-bottom: 22px;
+}
+QLabel[regularRightPadding=true][qApp_deviceIsDragon=true] {
+padding-right: 22px;
+}
+QLabel[sansSerifLabel=true] {
+font-family: Avenir;
+}
+QLabel[sansSerifLabel=true][qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+QLabel[sansSerifLabel=true][localeName="ja"] {
+font-family: Sans-SerifJP, sans-serif;
+  font-style: normal;
+}
+QLabel[sansSerifLabel=true][localeName="zh"] {
+font-family: Sans-SerifZH-Simplified, sans-serif;
+  font-style: normal;
+}
+QLabel[sansSerifLabel=true][localeName="zh-HK"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+QLabel[sansSerifLabel=true][localeName="zh-TW"] {
+font-family: Sans-SerifZH-Traditional, sans-serif;
+  font-style: normal;
+}
+QLabel[sansSerifLabel=true][localeName="tr-TR"] {
+font-family: Georgia;
+}
+QLabel[sansSerifLabel=true][localeName="tr-TR"][qApp_dyslexic=true] {
+font-family: OpenDyslexic;
+}
+RegularSpacingContainer[qApp_deviceIsDragon=true] {
+qproperty-spacing: 22px;
+}
+GenericContainerWidget[noSpacing=true] {
+qproperty-spacing: 0;
+}
+GenericContainerWidget[regularSpacing=true][qApp_deviceIsDragon=true] {
+qproperty-spacing: 22px;
+}
+ScrollableContentWidgetBase {
+qproperty-spacing: 0;
+  qproperty-topMargin: 0;
+  qproperty-rightMargin: 0;
+}
+ScrollableContentWidgetBase[qApp_deviceIsDragon=true] {
+qproperty-bottomMargin: 22px;
+}
+ScrollableContentWidgetBase[qApp_deviceIsDragon=true] {
+qproperty-leftMargin: 57;
+}
+ScrollableContentWidgetBase[noScrollBar=true][qApp_deviceIsDragon=true] {
+qproperty-rightMargin: 57;
+}
+
+/* Home-screen wallpaper (docs/app-development.md section 5.3).
+   HomePageView paints no style-sheet background itself; its full-size child
+   #mainContainer (a GenericContainerWidget, which sets WA_StyledBackground)
+   does. If the image is missing or unreadable, Qt draws only the white
+   background-color, as without this block. Image: grayscale PNG, about
+   1080x1430, pre-dithered to 16 levels; it is drawn unscaled and centred. */
+HomePageView #mainContainer {
+  background-color: white;
+  background-image: url(/mnt/onboard/.adds/wallpaper/home.png);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* Let the wallpaper show between the rows; the book tiles keep their white. */
+HomePageView #mainContainer > QWidget {
+  background-color: transparent;
+}
+/* Dark mode: no wallpaper (the text turns white). */
+*[darkMode=true] HomePageView #mainContainer,
+HomePageView #mainContainer[darkMode=true] {
+  background-color: black;
+  background-image: none;
+}

@@ -10,3 +10,14 @@ Fix the boot animation busy loop:
       
       NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
   - ReplaceText: {Find: "                usleep 250000;\n        fi\n", Replace: "        fi\n        usleep 250000;\n"}
+
+Add the Aura H2O boot, update and reset images:
+  - Enabled: no
+  - Category: "Boot (experimental)"
+  - Experimental: yes
+  - Description: |
+      The update has no dahlia-* images, so the Aura H2O shows no boot animation, blank update screens and a factory-reset prompt without a picture. This adds 15 of them, copied from the firmware's own dragon-* (Aura HD) images, which have exactly this panel's frame size (1080x1440). Check on the device first: 'ls /etc/images | grep -c ^dahlia-' must print 0, and 'zcat /etc/images/dragon-on-0.raw.gz | /usr/local/Kobo/pickel showpic 1' must look right. Undo: rm /etc/images/dahlia-*. (The patch itself only checks the animation script; the images are added as files.) (firmware-performance-and-bugs.md section 7.9)
+      
+      NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
+  - BaseAddress: 0
+  - ReplaceBytes: {FindH: 23 21 2F 62 69 6E 2F 73 68 0A, CheckOnly: true}   # "#!/bin/sh"

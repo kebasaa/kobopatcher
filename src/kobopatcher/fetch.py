@@ -289,6 +289,7 @@ def install_set(source, entry, dest):
 
     Returns a list of overrides that no longer exist in the new set (dropped).
     """
+    patchsets.check_requires(entry, __version__)
     data = source.set_zip(entry)
     version = entry["version"]
     conf = os.path.join(dest, "kobopatch.yaml")

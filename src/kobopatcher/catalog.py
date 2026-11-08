@@ -28,12 +28,13 @@ class CatalogError(KobopatcherError):
 class Entry:
     """One selectable item."""
 
-    def __init__(self, id, name, category="", description="", experimental=False):
+    def __init__(self, id, name, category="", description="", experimental=False, not_recommended=""):
         self.id = id
         self.name = name
         self.category = category or OTHER
         self.description = description
         self.experimental = experimental
+        self.not_recommended = not_recommended  # why the author advises against it ("" = no warning)
         self.targets = []  # [(patch file, target path)]
         self.groups = set()  # {(patch file, PatchGroup)}
         self.default = False  # the state written in the patch file(s)
@@ -49,6 +50,7 @@ class Entry:
             "category": self.category,
             "description": self.description,
             "experimental": self.experimental,
+            "not_recommended": self.not_recommended,
             "enabled": self.enabled,
             "default": self.default,
             "targets": [t for _, t in self.targets],
@@ -114,25 +116,33 @@ class Selection:
         p = pattern.lower()
         return [e for e in self.entries if fnmatch.fnmatchcase(e.id, p) or fnmatch.fnmatchcase(e.name.lower(), p)]
 
+    def _match_on(self, pat):
+        """Entries a pattern switches on: a glob (* or ?) skips NOT RECOMMENDED
+        entries, which only switch on when named."""
+        m = self.match(pat)
+        if any(c in pat for c in "*?"):
+            return [e for e in m if not getattr(e, "not_recommended", "")], m
+        return m, m
+
     def apply_flags(self, enable=(), disable=(), only=()):
         """--only, --enable and --disable, in that order."""
         if only:
             keep = set()
             for pat in only:
-                m = self.match(pat)
+                on, m = self._match_on(pat)
                 if not m:
                     raise CatalogError("--only %r matches no patch (see --list)" % pat)
-                keep.update(id(e) for e in m)
+                keep.update(id(e) for e in on)
             for e in self.entries:
                 e.enabled = False
             for e in self.entries:
                 if id(e) in keep:
                     self.set(e, True)
         for pat in enable:
-            m = self.match(pat)
+            on, m = self._match_on(pat)
             if not m:
                 raise CatalogError("--enable %r matches no patch (see --list)" % pat)
-            for e in m:
+            for e in on:
                 self.set(e, True)
         for pat in disable:
             m = self.match(pat)
@@ -156,6 +166,8 @@ class Selection:
             for e in self.in_category(cat):
                 mark = "[x]" if e.enabled else "[ ]"
                 tags = []
+                if e.not_recommended:
+                    tags.append("NOT RECOMMENDED")
                 if e.experimental:
                     tags.append("NEW/EXPERIMENTAL")
                 if e.groups:
@@ -170,6 +182,8 @@ class Selection:
         if any(e.experimental for e in self.entries):
             lines.append("")
             lines.append("NEW/EXPERIMENTAL entries have not been run on a device yet. Enable them one at a time.")
+        if any(e.not_recommended for e in self.entries):
+            lines.append("NOT RECOMMENDED entries work, but their author advises leaving them off; their description says why.")
         return "\n".join(lines)
 
     def to_json(self) -> str:
@@ -207,6 +221,7 @@ class PatchCatalog(Selection):
                         category=getattr(p, "category", ""),
                         description=getattr(p, "description", "").strip(),
                         experimental=getattr(p, "experimental", False),
+                        not_recommended=getattr(p, "not_recommended", ""),
                     )
                     by_name[name] = e
                     entries.append(e)
@@ -215,6 +230,7 @@ class PatchCatalog(Selection):
                     e.default = e.default or bool(getattr(p, "enabled", False))
                     if not e.category or e.category == OTHER:
                         e.category = getattr(p, "category", "") or e.category
+                    e.not_recommended = e.not_recommended or getattr(p, "not_recommended", "")
                 e.targets.append((pf, target))
                 for g in getattr(p, "patch_groups", []) or []:
                     e.groups.add((pf, g))

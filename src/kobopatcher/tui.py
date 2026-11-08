@@ -133,6 +133,8 @@ class MenuState:
                 off = self.sel.toggle(e)
                 if off:
                     self.message = "Switched off (same group): " + ", ".join(o.name for o in off)
+                elif e.enabled and getattr(e, "not_recommended", ""):
+                    self.message = "Not recommended: " + e.not_recommended
             elif self.current() is not None:
                 self._toggle_collapse(self.current().category)
         elif k in ("enter", "c"):
@@ -146,16 +148,20 @@ class MenuState:
         elif k in ("a", "n"):
             r = self.current()
             if r is not None:
-                skipped = False
+                skipped = skipped_nr = False
                 for e in self.sel.in_category(r.category):
                     if k == "n":
                         e.enabled = False
                     elif e.groups:
                         skipped = True
+                    elif getattr(e, "not_recommended", ""):
+                        skipped_nr = True
                     else:
                         e.enabled = True
-                if skipped:
-                    self.message = "Entries in a group were left alone (only one per group can be on)."
+                if skipped or skipped_nr:
+                    self.message = " ".join(
+                        m for m, on in (("Entries in a group were left alone (only one per group can be on).", skipped),
+                                        ("NOT RECOMMENDED entries were left off.", skipped_nr)) if on)
         elif k == "r":
             for e in self.sel.entries:
                 e.enabled = e.default
@@ -240,6 +246,8 @@ class MenuState:
             return "%s %s (%d of %d on)" % (arrow, r.category, sum(e.enabled for e in es), len(es))
         e = r.entry
         tags = []
+        if getattr(e, "not_recommended", ""):
+            tags.append("NOT RECOMMENDED")
         if e.experimental:
             tags.append("NEW")
         if e.groups:
@@ -257,6 +265,8 @@ class MenuState:
                 return ["No entries match the filter."]
             return ["%s: Space or Enter collapses/expands it; a/n switches all of it on/off." % r.category]
         out = []
+        if getattr(e, "not_recommended", ""):
+            out.extend(textwrap.wrap("NOT RECOMMENDED: " + e.not_recommended, max(10, width)))
         if e.experimental:
             out.append("NEW/EXPERIMENTAL: not yet run on a device.")
         for para in (e.description or "No description.").split("\n"):
@@ -316,6 +326,7 @@ def _run_curses(state, context):
                 curses.use_default_colors()
                 curses.init_pair(1, curses.COLOR_YELLOW, -1)
                 curses.init_pair(2, curses.COLOR_CYAN, -1)
+                curses.init_pair(3, curses.COLOR_RED, -1)
                 color = True
             except curses.error:
                 color = False
@@ -344,6 +355,8 @@ def _run_curses(state, context):
                 attr = curses.A_REVERSE if top + i == state.cursor else 0
                 if r.kind == "cat":
                     attr |= curses.A_BOLD | (curses.color_pair(2) if color else 0)
+                elif getattr(r.entry, "not_recommended", "") and color:
+                    attr |= curses.color_pair(3)
                 elif r.entry.experimental and color:
                     attr |= curses.color_pair(1)
                 put(scr, 1 + i, 0, state.row_text(r).ljust(list_w - 1), list_w - 1, attr)
@@ -397,7 +410,8 @@ def _run_plain(state, context, inp=input, out=print):
             out(cat)
             for e in state.sel.in_category(cat):
                 numbered.append(e)
-                tags = (" [NEW]" if e.experimental else "") + (" [group]" if e.groups else "")
+                tags = ((" [NOT RECOMMENDED]" if getattr(e, "not_recommended", "") else "")
+                        + (" [NEW]" if e.experimental else "") + (" [group]" if e.groups else ""))
                 val = " = %s" % e.value if getattr(e, "value", None) is not None else ""
                 out("  %3d [%s] %s%s%s" % (len(numbered), "x" if e.enabled else " ", e.name, val, tags))
         acts = ", ".join("%s = %s" % (k, label) for k, _, label in state.actions)
@@ -457,9 +471,12 @@ def _run_plain(state, context, inp=input, out=print):
             out("Not understood: %s" % line)
             continue
         for n in nums:
-            off = state.sel.toggle(numbered[n - 1])
+            e = numbered[n - 1]
+            off = state.sel.toggle(e)
             if off:
                 out("Switched off (same group): " + ", ".join(o.name for o in off))
+            elif e.enabled and getattr(e, "not_recommended", ""):
+                out("Not recommended: %s: %s" % (e.name, e.not_recommended))
         show()
 
 

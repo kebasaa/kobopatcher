@@ -6,7 +6,7 @@ Skip the disk check after a clean shutdown:
   - Category: "Boot (experimental)"
   - Experimental: yes
   - Description: |
-      The user partition is checked with dosfsck up to four times at every start. With this, the shutdown script leaves a marker after its own check, and the next start skips the check when the marker is there; crashes, watchdog reboots and power loss leave none, so those starts still check. Measure first with 'time dosfsck -n /dev/mmcblk0p3' on the device; if it takes well under a second, it isn't worth it. (firmware-performance-and-bugs.md S4)
+      The user partition is checked with dosfsck up to four times at every start. With this, the shutdown script checks the unmounted (or read-only) user partition itself and leaves a marker only if that check succeeded; the next start skips its check when the marker is there. Crashes, watchdog reboots, power loss and a failed or impossible shutdown check leave none, so those starts still check. Measure first with 'time dosfsck -n /dev/mmcblk0p3' on the device; if it takes well under a second, it isn't worth it. (firmware-performance-and-bugs.md S4, section 7.9)
       
       NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
   - ReplaceText: {Find: "dosfsck -a -w $ONBOARD_PARTITION || dosfsck -a -w $ONBOARD_PARTITION || dosfsck -a -w $ONBOARD_PARTITION || dosfsck -a -w $ONBOARD_PARTITION || FS_CORRUPT=1\n", Replace: "if [ -e /etc/.onboard_clean ]; then rm -f /etc/.onboard_clean; else dosfsck -a -w $ONBOARD_PARTITION || dosfsck -a -w $ONBOARD_PARTITION || dosfsck -a -w $ONBOARD_PARTITION || dosfsck -a -w $ONBOARD_PARTITION || FS_CORRUPT=1; fi\n"}

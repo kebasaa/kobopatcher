@@ -272,3 +272,62 @@ def test_conditional_files():
     fd = cfg.files["s.qss"][0]
     assert (fd.dest, fd.cond, fd.mode) == ("etc/kobo.qss", "a.yaml: Use it", 0o644)
     assert [d.dest for d in cfg.files["t.txt"]] == ["x/a", "x/b"]
+
+
+PATCH_NR = """
+Safe tweak:
+  - Enabled: no
+  - Category: Speed
+  - FindReplaceString: {Find: "a", Replace: "b"}
+Risky tweak:
+  - Enabled: no
+  - Category: Speed
+  - NotRecommended: it makes every start 20 s slower
+  - FindReplaceString: {Find: "c", Replace: "d"}
+"""
+
+
+@pytest.fixture
+def nr_set(tmp_path, monkeypatch):
+    (tmp_path / "n.yaml").write_text(PATCH_NR, encoding="utf-8")
+    (tmp_path / "kobopatch.yaml").write_text(
+        "version: 1.2.3\nin: fw.zip\nout: out.tgz\nlog: log.txt\npatches:\n  n.yaml: usr/local/Kobo/libn.so\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+
+def test_not_recommended_parse():
+    ps = K.parse(PATCH_NR.encode())
+    assert ps.parsed["Risky tweak"].not_recommended == "it makes every start 20 s slower"
+    assert ps.parsed["Safe tweak"].not_recommended == ""
+    ps.validate()
+    with pytest.raises(Exception, match="NotRecommended needs a reason"):
+        K.parse(b'X:\n  - NotRecommended: ""\n  - FindReplaceString: {Find: "a", Replace: "b"}\n')
+
+
+def test_not_recommended_flags_and_list(nr_set, capsys):
+    cfg, cat = catalog.load("kobopatch.yaml")
+    risky, safe = cat.get("risky-tweak"), cat.get("safe-tweak")
+    assert risky.not_recommended and risky.to_json()["not_recommended"]
+    cat.apply_flags(enable=["*"])
+    assert safe.enabled and not risky.enabled  # a glob leaves it off
+    cat.apply_flags(only=["*tweak"])
+    assert safe.enabled and not risky.enabled
+    cat.apply_flags(enable=["risky-tweak"])
+    assert risky.enabled  # named: switched on
+    assert cli.main(["--list"]) == 0
+    out = capsys.readouterr().out
+    assert "risky-tweak" in out and "NOT RECOMMENDED" in out and "advises leaving them off" in out
+
+
+def test_not_recommended_menu(nr_set):
+    cfg, cat = catalog.load("kobopatch.yaml")
+    state = tui.MenuState(cat, [])
+    risky = cat.get("risky-tweak")
+    assert "NOT RECOMMENDED" in state.row_text(next(r for r in state.rows if r.kind != "cat" and r.entry is risky))
+    state.cursor = next(i for i, r in enumerate(state.rows) if r.kind == "cat")
+    state.key("a")
+    assert not risky.enabled and cat.get("safe-tweak").enabled and "NOT RECOMMENDED" in state.message
+    state.cursor = next(i for i, r in enumerate(state.rows) if r.kind != "cat" and r.entry is risky)
+    assert state.detail_lines(80)[0].startswith("NOT RECOMMENDED: it makes")
+    state.key("space")
+    assert risky.enabled and state.message.startswith("Not recommended:")

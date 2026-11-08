@@ -52,7 +52,19 @@ Use a stylesheet pruned for the Aura H2O:
       Loads /etc/kobo.qss instead of the built-in stylesheet: the same rules without the 535 that can only match other models (85 KB -> about 33 KB to parse at every start). The file is added to KoboRoot.tgz only when this patch is on. Check every screen afterwards. (firmware-performance-and-bugs.md §7.4)
       
       NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
+  - PatchGroup: Global stylesheet
   - FindReplaceString: {Find: ":/default.qss", Replace: "/etc/kobo.qss"}
+
+Use a stylesheet pruned for the Aura H2O, with a home-screen wallpaper:
+  - Enabled: no
+  - Category: "Performance (experimental)"
+  - Experimental: yes
+  - Description: |
+      The same pruned stylesheet (/etc/kbwp.qss) plus a home-screen wallpaper: the picture /mnt/onboard/.adds/wallpaper/home.png is drawn behind the home screen (grayscale PNG, about 1080x1430, pre-dithered to 16 levels; drawn unscaled and centred). Without that file Home looks as usual. Change the picture by replacing the file. Check on the device: e-ink ghosting, the time to draw Home, dark mode. (app-development.md section 5.3)
+      
+      NEW: built from the Kobo Aura H2O analysis; not yet run on a device.
+  - PatchGroup: Global stylesheet
+  - FindReplaceString: {Find: ":/default.qss", Replace: "/etc/kbwp.qss"}
 
 Log UI messages at warning level (binary patch):
   - Enabled: no

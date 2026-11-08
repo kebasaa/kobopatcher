@@ -340,6 +340,9 @@ def run_start(a, ui):
     on = [e for e in cat.entries if e.enabled]
     ui.say("%d %s selected (%d of them new/experimental). The choice is saved in %s." %
            (len(on), "patch" if len(on) == 1 else "patches", sum(e.experimental for e in on), conf))
+    for e in on:
+        if e.not_recommended:
+            ui.say("Warning: %s is on, but NOT RECOMMENDED: %s" % (e.name, e.not_recommended))
     if action == "save":
         return 0
 

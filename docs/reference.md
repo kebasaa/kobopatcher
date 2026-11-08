@@ -80,6 +80,7 @@ Flow style (`{Key: value, ...}`) and block style are equivalent:
 | `PatchGroup` | text | At most one enabled patch per group (per patch file). A patch can be in several groups. In the menu, group members behave like radio buttons. |
 | `Category` | text | kobopatcher extension: the menu category (`kobopatcher --list`, `--select`). Patches without one are listed under "Other". |
 | `Experimental` | `yes`/`no` | kobopatcher extension: marks a new patch that hasn't been run on a device; the menu shows it as NEW/EXPERIMENTAL with a warning. |
+| `NotRecommended` | text (the reason) | kobopatcher extension: the patch works, but its author advises leaving it off. `--list` and the menu show it as NOT RECOMMENDED (in red) with the reason; switching it on shows the reason again; "all on" in the menu and `--enable`/`--only` with a `*` or `?` pattern leave it off (name it to switch it on); guided mode warns when it is on. |
 
 ## Finding the place to patch
 

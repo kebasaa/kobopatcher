@@ -53,11 +53,95 @@ patches:
   src/plugins/libpdb.yaml: usr/local/Kobo/libpdb.so
   src/plugins/libsandbox.yaml: usr/local/Kobo/libsandbox.so
   src/boot/rcS.yaml: etc/init.d/rcS
-  src/boot/rcK.yaml: etc/init.d/rcK
   src/boot/on-animator.yaml: etc/init.d/on-animator.sh
+  src/libnickel/exact.yaml: usr/local/Kobo/libnickel.so.1.0.0
+  src/nickel/rpath.yaml: usr/local/Kobo/nickel
+  src/libkobo/eink.yaml: usr/local/Kobo/platforms/libkobo.so
+  src/sickel/watchdog.yaml: usr/local/Kobo/sickel
+  src/pickel/factory-reset.yaml: usr/local/Kobo/pickel-imx
+  src/boot/rcS-fixes.yaml: etc/init.d/rcS
+  src/boot/rcS-factory-reset.yaml: etc/init.d/rcS
+  src/boot/rcK.yaml: etc/init.d/rcK
+  src/dbus/fickel.yaml: usr/share/dbus-1/services/com.kobo.wifi.Fickel.service
+  src/net/50-ntpdate.yaml: libexec/dhcpcd-hooks/50-ntpdate
+  src/net/ntpd.yaml: usr/local/Kobo/ntpd.sh
+  src/ssh/ssh.yaml: etc/init.d/ssh
+  src/ssh/sshd.yaml: usr/sbin/sshd
+  src/ssh/sshd_config.yaml: etc/ssh/sshd_config
+  src/udev/ac.yaml: usr/local/Kobo/udev/ac
+  src/udev/bat.yaml: usr/local/Kobo/udev/bat
+  src/udev/input.yaml: usr/local/Kobo/udev/input
+  src/udev/plug.yaml: usr/local/Kobo/udev/plug
+  src/udev/sd.yaml: usr/local/Kobo/udev/sd
+  src/udev/usb.yaml: usr/local/Kobo/udev/usb
+  src/nickel/qss-prune.yaml: usr/local/Kobo/nickel
 files:
   src/kobo.qss:
     dest: etc/kobo.qss
     if: "src/libnickel/experimental.yaml: Use a stylesheet pruned for the Aura H2O"
+    mode: 0644
+  src/kobo-wallpaper.qss:
+    dest: etc/kbwp.qss
+    if: "src/libnickel/experimental.yaml: Use a stylesheet pruned for the Aura H2O, with a home-screen wallpaper"
+    mode: 0644
+  firmware:etc/images/dragon-on-0.raw.gz:
+    dest: etc/images/dahlia-on-0.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-on-1.raw.gz:
+    dest: etc/images/dahlia-on-1.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-on-2.raw.gz:
+    dest: etc/images/dahlia-on-2.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-on-3.raw.gz:
+    dest: etc/images/dahlia-on-3.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-on-4.raw.gz:
+    dest: etc/images/dahlia-on-4.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-on-5.raw.gz:
+    dest: etc/images/dahlia-on-5.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-update-spinner-0.raw.gz:
+    dest: etc/images/dahlia-update-spinner-0.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-update-spinner-1.raw.gz:
+    dest: etc/images/dahlia-update-spinner-1.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-update-spinner-2.raw.gz:
+    dest: etc/images/dahlia-update-spinner-2.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-update-spinner-3.raw.gz:
+    dest: etc/images/dahlia-update-spinner-3.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-update-spinner-4.raw.gz:
+    dest: etc/images/dahlia-update-spinner-4.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-update-spinner-5.raw.gz:
+    dest: etc/images/dahlia-update-spinner-5.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-ghostbuster.raw.gz:
+    dest: etc/images/dahlia-ghostbuster.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-reboot.raw.gz:
+    dest: etc/images/dahlia-reboot.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
+    mode: 0644
+  firmware:etc/images/dragon-factory-reset.raw.gz:
+    dest: etc/images/dahlia-factory-reset.raw.gz
+    if: "src/boot/on-animator.yaml: Add the Aura H2O boot, update and reset images"
     mode: 0644
 overrides: {}
